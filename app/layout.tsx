@@ -65,6 +65,12 @@ export default function RootLayout({
                 >
                   Stats
                 </Link>
+                <Link
+                  href="/admin"
+                  className="txt-meta opacity-30 hover:opacity-100 transition-opacity"
+                >
+                  Admin
+                </Link>
               </nav>
             </div>
             <CircularStamp />
