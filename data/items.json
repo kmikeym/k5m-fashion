@@ -1,0 +1,32 @@
+[
+  {
+    "id": "black-slim-jeans",
+    "name": "Black Slim Jeans",
+    "category": "bottoms",
+    "image": "/items/black-slim-jeans.jpg"
+  },
+  {
+    "id": "white-tee",
+    "name": "White Crew Tee",
+    "category": "tops",
+    "image": "/items/white-tee.jpg"
+  },
+  {
+    "id": "dodgers-hat",
+    "name": "LA Dodgers Cap",
+    "category": "hats",
+    "image": "/items/dodgers-hat.jpg"
+  },
+  {
+    "id": "grey-hoodie",
+    "name": "Grey Zip Hoodie",
+    "category": "outerwear",
+    "image": "/items/grey-hoodie.jpg"
+  },
+  {
+    "id": "white-sneakers",
+    "name": "White Sneakers",
+    "category": "shoes",
+    "image": "/items/white-sneakers.jpg"
+  }
+]

@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cream text-ink font-body;
+  }
+
+  ::selection {
+    @apply bg-hot/20 text-ink;
+  }
+}
+
+@layer components {
+  .outfit-card {
+    @apply relative overflow-hidden bg-white border border-blush/60;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .outfit-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  }
+
+  .vote-btn {
+    @apply px-5 py-2.5 font-body font-medium text-sm tracking-wide uppercase transition-all duration-150;
+  }
+
+  .vote-btn-hot {
+    @apply vote-btn bg-hot text-white hover:bg-hot/90 active:scale-95;
+  }
+
+  .vote-btn-not {
+    @apply vote-btn bg-not/20 text-not hover:bg-not/30 active:scale-95;
+  }
+
+  .item-tag {
+    @apply inline-block px-2.5 py-1 text-xs font-mono tracking-wider uppercase bg-blush/50 text-smoke;
+  }
+
+  .stat-value {
+    @apply font-display text-4xl italic;
+  }
+}
+
+/* Grain overlay for texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 9999;
+}

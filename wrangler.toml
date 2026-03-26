@@ -1,0 +1,8 @@
+name = "k5m-fashion"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "k5m-fashion-votes"
+database_id = "" # Fill after creating D1 database in Cloudflare dashboard
