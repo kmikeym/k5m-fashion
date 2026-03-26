@@ -59,24 +59,26 @@ export default function Header() {
         </nav>
       </div>
 
-      <div className="flex items-center gap-3">
-        <SignedOut>
-          <SignInButton mode="modal">
-            <button className="txt-meta font-bold uppercase tracking-wider hover:opacity-70 transition-opacity cursor-pointer">
-              Sign In
-            </button>
-          </SignInButton>
-        </SignedOut>
-        <SignedIn>
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'w-8 h-8',
-              },
-            }}
-          />
-        </SignedIn>
+      <div className="relative flex items-center justify-center" style={{ width: 64, height: 64 }}>
         <CircularStamp />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className="w-7 h-7 rounded-full bg-ink/10 flex items-center justify-center cursor-pointer hover:bg-ink/20 transition-colors">
+                <span style={{ fontSize: 10, fontWeight: 700 }}>?</span>
+              </button>
+            </SignInButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: 'w-7 h-7',
+                },
+              }}
+            />
+          </SignedIn>
+        </div>
       </div>
     </header>
   );
