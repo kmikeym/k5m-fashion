@@ -7,6 +7,23 @@ export const metadata: Metadata = {
   description: 'Dress with purpose. Rate outfits, discover what works.',
 };
 
+function CircularStamp() {
+  return (
+    <svg className="circular-stamp" viewBox="0 0 100 100">
+      <path
+        id="circlePath"
+        d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0"
+        fill="none"
+      />
+      <text>
+        <textPath href="#circlePath" startOffset="0%">
+          Fully Fashioned &bull; Cast Vote &bull;
+        </textPath>
+      </text>
+    </svg>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -14,54 +31,65 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen">
-        <header className="border-b border-blush/60 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-          <nav className="max-w-5xl mx-auto px-6 py-4 flex items-baseline justify-between">
-            <Link href="/" className="group">
-              <h1 className="font-display text-2xl italic text-ink tracking-tight">
-                Fully Fashioned
-              </h1>
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-smoke block -mt-0.5">
-                A KmikeyM &times; curtmerrill collaboration
-              </span>
-            </Link>
-            <div className="flex gap-6 text-sm font-body text-smoke">
-              <Link
-                href="/"
-                className="hover:text-ink transition-colors"
-              >
-                Fits
+      <body>
+        <div className="noise-overlay" />
+
+        <div className="w-full max-w-[430px] md:max-w-[860px] relative overflow-x-hidden flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+          {/* Header */}
+          <header
+            className="flex justify-between items-start relative z-10"
+            style={{
+              padding: '48px var(--pad) 16px',
+              background: 'var(--grad-warm)',
+            }}
+          >
+            <div className="flex flex-col">
+              <Link href="/" className="txt-meta hover:opacity-70 transition-opacity">
+                Mike&apos;s Wardrobe
               </Link>
-              <Link
-                href="/items"
-                className="hover:text-ink transition-colors"
-              >
-                Wardrobe
-              </Link>
-              <Link
-                href="/stats"
-                className="hover:text-ink transition-colors"
-              >
-                Stats
-              </Link>
+              <nav className="flex gap-4 mt-1">
+                <Link
+                  href="/"
+                  className="txt-meta opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  Fits
+                </Link>
+                <Link
+                  href="/items"
+                  className="txt-meta opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  Wardrobe
+                </Link>
+                <Link
+                  href="/stats"
+                  className="txt-meta opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  Stats
+                </Link>
+              </nav>
             </div>
-          </nav>
-        </header>
+            <CircularStamp />
+          </header>
 
-        <main className="max-w-5xl mx-auto px-6 py-10">
+          {/* Content */}
           {children}
-        </main>
 
-        <footer className="border-t border-blush/60 mt-20">
-          <div className="max-w-5xl mx-auto px-6 py-8 flex items-baseline justify-between">
-            <p className="text-xs font-mono text-smoke/60 tracking-wide">
+          {/* Footer */}
+          <div
+            className="relative z-10"
+            style={{
+              padding: '48px var(--pad)',
+              borderTop: '1px solid var(--color-text)',
+            }}
+          >
+            <p className="txt-meta opacity-40">
+              Fully Fashioned &mdash; A KmikeyM &times; curtmerrill collaboration
+            </p>
+            <p className="txt-meta opacity-25 mt-1">
               Dress with purpose &mdash; since 2012
             </p>
-            <p className="text-xs font-mono text-smoke/40">
-              K5M &times; curtmerrill
-            </p>
           </div>
-        </footer>
+        </div>
       </body>
     </html>
   );

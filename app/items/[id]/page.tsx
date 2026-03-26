@@ -15,39 +15,53 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
   const outfits = getOutfitsForItem(id);
 
   return (
-    <div>
-      <Link
-        href="/items"
-        className="text-xs font-mono text-smoke/60 tracking-wider uppercase hover:text-ink transition-colors"
+    <>
+      {/* Header on cool gradient */}
+      <section
+        className="relative z-10"
+        style={{
+          background: 'var(--grad-cool)',
+          padding: '48px var(--pad) 32px',
+          borderTop: '1px solid var(--color-text)',
+        }}
       >
-        &larr; Wardrobe
-      </Link>
+        <Link
+          href="/items"
+          className="txt-meta opacity-50 hover:opacity-100 transition-opacity"
+        >
+          &larr; Wardrobe
+        </Link>
 
-      <div className="mt-6 mb-10">
-        <span className="item-tag mb-2 inline-block">{item.category}</span>
-        <h2 className="font-display text-4xl italic text-ink">{item.name}</h2>
-        <p className="text-smoke font-body mt-1">
-          Appears in {outfits.length} outfit{outfits.length !== 1 ? 's' : ''}
-        </p>
-      </div>
+        <div className="mt-6">
+          <p className="txt-meta uppercase opacity-60 mb-2">{item.category}</p>
+          <h2 className="txt-display-solid">{item.name}</h2>
+          <p className="txt-meta opacity-50 mt-2">
+            Appears in {outfits.length} outfit{outfits.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </section>
 
+      {/* Outfits on warm gradient */}
       {outfits.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {outfits.map((outfit) => (
+        outfits.map((outfit) => (
+          <div key={outfit.id} style={{ background: 'var(--grad-warm)' }}>
             <OutfitCard
-              key={outfit.id}
               outfit={outfit}
               items={getItemsForOutfit(outfit)}
             />
-          ))}
-        </div>
+          </div>
+        ))
       ) : (
-        <div className="text-center py-16 border border-dashed border-blush">
-          <p className="font-display text-xl italic text-smoke/50">
-            No outfits yet with this item
-          </p>
+        <div
+          className="relative z-10 text-center"
+          style={{
+            padding: '80px var(--pad)',
+            background: 'var(--grad-warm)',
+          }}
+        >
+          <p className="txt-meta opacity-50">No outfits yet with this item</p>
         </div>
       )}
-    </div>
+    </>
   );
 }

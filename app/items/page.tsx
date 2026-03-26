@@ -6,40 +6,45 @@ export default function ItemsPage() {
   const categories = [...new Set(items.map((i) => i.category))];
 
   return (
-    <div>
-      <h2 className="font-display text-5xl italic text-ink mb-2">Wardrobe</h2>
-      <p className="text-smoke font-body text-lg mb-10">
-        Every piece in the rotation. Tap to see how it performs.
-      </p>
+    <section
+      className="relative z-10 flex flex-col"
+      style={{
+        background: 'var(--grad-cool)',
+        padding: '64px var(--pad)',
+        minHeight: '100vh',
+        borderTop: '1px solid var(--color-text)',
+      }}
+    >
+      <div className="mb-12">
+        <p className="txt-meta mb-4">Full Inventory</p>
+        <h2 className="txt-display-outline">The</h2>
+        <h3 className="txt-display-solid">Wardrobe</h3>
+      </div>
 
       {categories.map((cat) => (
-        <div key={cat} className="mb-10">
-          <h3 className="text-[11px] font-mono tracking-[0.2em] uppercase text-smoke/60 mb-4 border-b border-blush/40 pb-2">
+        <div key={cat} className="mb-8">
+          <p className="txt-meta font-semibold uppercase opacity-60 mb-3">
             {cat}
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          </p>
+          <div className="flex flex-col">
             {items
               .filter((i) => i.category === cat)
               .map((item) => {
                 const outfitCount = getOutfitsForItem(item.id).length;
                 return (
                   <Link key={item.id} href={`/items/${item.id}`}>
-                    <div className="group border border-blush/40 bg-white p-3 hover:border-ink/20 transition-colors">
-                      <div className="aspect-square bg-blush/20 mb-2 overflow-hidden">
-                        {item.image && (
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                          />
-                        )}
+                    <div className="data-row">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-lg font-bold leading-tight tracking-tight">
+                          {item.name}
+                        </span>
+                        <span className="txt-meta uppercase opacity-70">
+                          {outfitCount} outfit{outfitCount !== 1 ? 's' : ''}
+                        </span>
                       </div>
-                      <p className="text-sm font-body text-ink leading-tight">
-                        {item.name}
-                      </p>
-                      <p className="text-[10px] font-mono text-smoke/50 mt-0.5">
-                        {outfitCount} outfit{outfitCount !== 1 ? 's' : ''}
-                      </p>
+                      <div className="flex items-center">
+                        <span className="txt-meta opacity-40">&rarr;</span>
+                      </div>
                     </div>
                   </Link>
                 );
@@ -49,15 +54,14 @@ export default function ItemsPage() {
       ))}
 
       {items.length === 0 && (
-        <div className="text-center py-20 border border-dashed border-blush">
-          <p className="font-display text-2xl italic text-smoke/50">
-            Wardrobe empty
-          </p>
-          <p className="text-sm text-smoke/40 mt-2 font-mono">
+        <div className="py-16">
+          <h2 className="txt-display-outline">Empty</h2>
+          <h3 className="txt-display-solid">Closet</h3>
+          <p className="txt-meta opacity-50 mt-4">
             Add items to data/items.json
           </p>
         </div>
       )}
-    </div>
+    </section>
   );
 }

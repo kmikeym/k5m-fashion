@@ -5,39 +5,49 @@ export default function Home() {
   const outfits = getOutfits();
 
   return (
-    <div>
-      {/* Hero */}
-      <div className="mb-12">
-        <h2 className="font-display text-5xl italic text-ink mb-2">
-          'Fit Check
-        </h2>
-        <p className="text-smoke font-body text-lg max-w-lg">
-          Rate the outfit. The data reveals which pieces work &mdash; and which
-          ones need to stay in the drawer.
-        </p>
+    <>
+      {/* Hero — warm gradient */}
+      <div
+        className="relative z-10"
+        style={{
+          padding: '0 var(--pad) 24px',
+          background: 'var(--grad-warm)',
+        }}
+      >
+        <div className="mb-6">
+          <h1 className="txt-display-outline">Daily Fit</h1>
+          <h2 className="txt-display-solid">Evaluation</h2>
+        </div>
       </div>
 
-      {/* Feed */}
+      {/* Outfits on warm gradient */}
       {outfits.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-blush">
-          <p className="font-display text-2xl italic text-smoke/50">
-            No fits yet
-          </p>
-          <p className="text-sm text-smoke/40 mt-2 font-mono">
+        <div
+          className="relative z-10 text-center"
+          style={{
+            padding: '80px var(--pad)',
+            background: 'var(--grad-warm)',
+          }}
+        >
+          <h2 className="txt-display-outline">No Fits</h2>
+          <h3 className="txt-display-solid">Yet</h3>
+          <p className="txt-meta opacity-50 mt-4">
             Add outfits to data/outfits.json
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {outfits.map((outfit) => (
+        outfits.map((outfit) => (
+          <div
+            key={outfit.id}
+            style={{ background: 'var(--grad-warm)' }}
+          >
             <OutfitCard
-              key={outfit.id}
               outfit={outfit}
               items={getItemsForOutfit(outfit)}
             />
-          ))}
-        </div>
+          </div>
+        ))
       )}
-    </div>
+    </>
   );
 }

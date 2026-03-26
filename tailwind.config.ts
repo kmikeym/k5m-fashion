@@ -8,18 +8,11 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Instrument Serif"', 'Georgia', 'serif'],
-        body: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        primary: ['"Helvetica Neue"', 'Helvetica', '-apple-system', 'BlinkMacSystemFont', 'Arial', 'sans-serif'],
       },
       colors: {
-        cream: '#FAF7F2',
-        ink: '#1A1A1A',
-        smoke: '#6B6B6B',
-        blush: '#E8DDD3',
-        hot: '#D4503A',
-        not: '#8B9DAF',
-        gold: '#C4A265',
+        ink: '#0d0d0d',
+        line: 'rgba(13, 13, 13, 0.3)',
       },
     },
   },
