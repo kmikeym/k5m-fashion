@@ -1,25 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import itemsData from '@/data/items.json';
 
-const ITEMS_PATH = path.join(process.cwd(), 'data', 'items.json');
+export const runtime = 'edge';
 
-function readItems() {
-  const raw = fs.readFileSync(ITEMS_PATH, 'utf-8');
-  return JSON.parse(raw);
-}
-
-function writeItems(items: unknown[]) {
-  fs.writeFileSync(ITEMS_PATH, JSON.stringify(items, null, 2) + '\n');
-}
-
-// GET all items
+// GET all items — works everywhere (reads from bundled JSON)
 export async function GET() {
-  const items = readItems();
-  return NextResponse.json(items);
+  return NextResponse.json(itemsData);
 }
 
-// POST new item
+// POST new item — local dev only (needs filesystem)
 export async function POST(request: NextRequest) {
   try {
     const { name, category } = await request.json();
@@ -28,23 +17,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'name and category required' }, { status: 400 });
     }
 
-    const id = name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+    // Dynamic require — only works in Node.js (local dev)
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const filePath = path.join(process.cwd(), 'data', 'items.json');
+      const items = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
-    const items = readItems();
+      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      if (items.find((i: { id: string }) => i.id === id)) {
+        return NextResponse.json({ error: 'Item already exists', id }, { status: 409 });
+      }
 
-    // Check for duplicate
-    if (items.find((i: { id: string }) => i.id === id)) {
-      return NextResponse.json({ error: 'Item already exists', id }, { status: 409 });
+      const newItem = { id, name, category, image: `/items/${id}.jpg` };
+      items.push(newItem);
+      fs.writeFileSync(filePath, JSON.stringify(items, null, 2) + '\n');
+
+      return NextResponse.json(newItem, { status: 201 });
+    } catch {
+      return NextResponse.json({ error: 'Admin features require local dev mode' }, { status: 501 });
     }
-
-    const newItem = { id, name, category, image: `/items/${id}.jpg` };
-    items.push(newItem);
-    writeItems(items);
-
-    return NextResponse.json(newItem, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
