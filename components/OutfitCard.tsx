@@ -55,6 +55,9 @@ export default function OutfitCard({
     if (choice === 'hot') setHotCount((c) => c + 1);
     else setNotCount((c) => c + 1);
     setLoading(false);
+
+    // Notify parent to advance to next outfit
+    window.dispatchEvent(new CustomEvent('outfit-voted'));
   }
 
   const total = hotCount + notCount;

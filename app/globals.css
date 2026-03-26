@@ -93,8 +93,6 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  mix-blend-mode: luminosity;
-  opacity: 0.9;
 }
 
 /* Photo tags */
