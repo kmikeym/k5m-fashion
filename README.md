@@ -22,9 +22,12 @@ Also: Mike is spending two months in Kosovo starting April 2026, living out of a
 
 ## How It Works
 
-1. **Post a 'fit pic** — add an outfit to `data/outfits.json` with tagged items, drop the photo in `public/outfits/`
+1. **Post a 'fit pic** — add an outfit to `data/outfits.json`, drop the photo in `public/outfits/`
 2. **People vote Hot or Not** — anonymous, one vote per outfit per browser
-3. **Stats reveal patterns** — per-item hot rates, pair synergies, best and worst combos
+3. **Tag items later** — items can be empty at first. Post the pic, collect votes, then go back and tag the pieces when you have time. Votes still count; correlations update once items are tagged.
+4. **Stats reveal patterns** — per-item hot rates, pair synergies, best and worst combos
+
+This means you can batch-upload a week of photos in one push, let votes roll in, and tag everything on a lazy Sunday. The voting and the tagging are decoupled.
 
 ### Pages
 

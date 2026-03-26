@@ -106,6 +106,11 @@ export default function OutfitCard({ outfit, items }: OutfitCardProps) {
 
         {/* Item tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">
+          {items.length === 0 && (
+            <span className="text-[10px] font-mono text-smoke/30 italic tracking-wide">
+              items not yet tagged
+            </span>
+          )}
           {items.map((item) => (
             <Link key={item.id} href={`/items/${item.id}`}>
               <span className="item-tag hover:bg-blush/80 transition-colors cursor-pointer">
