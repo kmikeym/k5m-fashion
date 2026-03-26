@@ -38,11 +38,25 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [uploading, setUploading] = useState(false);
+
+  async function refreshOutfits() {
+    // Fetch fresh from the JSON file via a cache-busting import
+    const res = await fetch(`/api/outfits/list?t=${Date.now()}`);
+    if (res.ok) {
+      const data = await res.json();
+      setOutfits(
+        (data as Outfit[]).sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+      );
+    }
+  }
 
   useEffect(() => {
     Promise.all([
       fetch('/api/items').then((r) => r.json()),
-      import('@/data/outfits.json').then((m) => m.default),
+      fetch('/api/outfits/list').then((r) => r.json()),
     ]).then(([itemsData, outfitsData]) => {
       setItems(itemsData);
       setOutfits(
@@ -52,6 +66,32 @@ export default function AdminPage() {
       );
     });
   }, []);
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    try {
+      const res = await fetch('/api/outfits/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        await refreshOutfits();
+      }
+    } catch {
+      // Handle error silently for now
+    }
+
+    setUploading(false);
+    // Reset the input so the same file can be uploaded again
+    e.target.value = '';
+  }
 
   async function refreshItems() {
     const data = await fetch('/api/items').then((r) => r.json());
@@ -137,6 +177,29 @@ export default function AdminPage() {
         <Link href="/" className="txt-meta opacity-50 hover:opacity-100 transition-opacity">
           &larr; Back to feed
         </Link>
+      </div>
+
+      {/* Upload New Outfit */}
+      <div className="mb-10" style={{ borderBottom: '1px solid var(--color-text)', paddingBottom: '24px' }}>
+        <div className="flex justify-between items-center">
+          <p className="txt-meta font-semibold uppercase">
+            Outfits ({outfits.length})
+          </p>
+          <label
+            className="txt-meta font-bold uppercase tracking-wider hover:opacity-70 transition-opacity cursor-pointer"
+            style={{ opacity: uploading ? 0.3 : 1 }}
+          >
+            {uploading ? 'Uploading...' : '+ New Outfit'}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+          </label>
+        </div>
       </div>
 
       {/* New Item Creator */}
