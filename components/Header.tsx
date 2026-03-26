@@ -46,6 +46,11 @@ export default function Header() {
           <Link href="/stats" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
             Stats
           </Link>
+          <SignedIn>
+            <Link href="/my-votes" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
+              My Votes
+            </Link>
+          </SignedIn>
           {isAdmin && (
             <Link href="/admin" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
               Admin

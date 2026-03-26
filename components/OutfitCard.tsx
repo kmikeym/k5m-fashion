@@ -16,21 +16,20 @@ export default function OutfitCard({
   items,
   showVoting = true,
 }: OutfitCardProps) {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
   const [voted, setVoted] = useState<'hot' | 'not' | null>(null);
   const [hotCount, setHotCount] = useState(0);
   const [notCount, setNotCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const prev = localStorage.getItem(`vote-${outfit.id}`);
-    if (prev === 'hot' || prev === 'not') setVoted(prev);
-
     fetch(`/api/votes?outfit_id=${outfit.id}`)
       .then((r) => r.json())
       .then((data) => {
         setHotCount(data.hot || 0);
         setNotCount(data.not || 0);
+        // Server tells us if we already voted
+        if (data.myVote) setVoted(data.myVote);
       })
       .catch(() => {});
   }, [outfit.id]);
@@ -40,7 +39,7 @@ export default function OutfitCard({
     setLoading(true);
 
     try {
-      await fetch('/api/vote', {
+      const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -48,17 +47,22 @@ export default function OutfitCard({
           vote: choice === 'hot' ? 1 : 0,
         }),
       });
+
+      if (res.status === 409) {
+        // Already voted — just update state
+        setVoted(choice);
+        setLoading(false);
+        return;
+      }
     } catch {
-      // offline — still record locally
+      // offline
     }
 
-    localStorage.setItem(`vote-${outfit.id}`, choice);
     setVoted(choice);
     if (choice === 'hot') setHotCount((c) => c + 1);
     else setNotCount((c) => c + 1);
     setLoading(false);
 
-    // Notify parent to advance to next outfit
     window.dispatchEvent(new CustomEvent('outfit-voted'));
   }
 
@@ -98,7 +102,7 @@ export default function OutfitCard({
             {/* Score badge */}
             {hotPct !== null && (
               <div className="absolute top-3 right-3 bg-white/90 px-2 py-1">
-                <span className="txt-meta font-bold">{hotPct}%</span>
+                <span className="txt-meta font-bold">{hotPct}% Hot</span>
               </div>
             )}
           </div>
@@ -115,10 +119,30 @@ export default function OutfitCard({
             )}
           </div>
         )}
+
+        {/* Vote results bar (when voted or just viewing) */}
+        {total > 0 && voted && (
+          <div className="mb-4">
+            <div className="flex h-2 overflow-hidden" style={{ border: '1px solid var(--color-text)' }}>
+              <div
+                className="bg-ink transition-all duration-500"
+                style={{ width: `${hotPct}%` }}
+              />
+              <div
+                className="bg-transparent transition-all duration-500"
+                style={{ width: `${100 - (hotPct || 0)}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-1">
+              <span className="txt-meta opacity-50">{hotPct}% Hot</span>
+              <span className="txt-meta opacity-50">{total} vote{total !== 1 ? 's' : ''}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Vote buttons */}
-      {showVoting && !isSignedIn ? (
+      {!isLoaded ? null : showVoting && !isSignedIn ? (
         <div
           className="relative z-10 text-center"
           style={{

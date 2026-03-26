@@ -2,53 +2,66 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 import OutfitCard from '@/components/OutfitCard';
 import outfitsData from '@/data/outfits.json';
 import itemsData from '@/data/items.json';
 import type { Outfit, Item } from '@/lib/types';
 
 export default function Home() {
+  const { isSignedIn } = useUser();
   const allOutfits = (outfitsData as Outfit[]).sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
   const allItems = itemsData as Item[];
 
-  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
-  const [votes, setVotes] = useState<Record<string, 'hot' | 'not'>>({});
   const [queue, setQueue] = useState<Outfit[]>([]);
+  const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
+  const [myVotes, setMyVotes] = useState<Record<string, 'hot' | 'not'>>({});
+  const [tallies, setTallies] = useState<Record<string, { hot: number; not: number }>>({});
 
-  const buildQueue = useCallback(() => {
-    const voted = new Set<string>();
-    const voteMap: Record<string, 'hot' | 'not'> = {};
-    for (const outfit of allOutfits) {
-      const v = localStorage.getItem(`vote-${outfit.id}`);
-      if (v === 'hot' || v === 'not') {
-        voted.add(outfit.id);
-        voteMap[outfit.id] = v;
-      }
+  const refresh = useCallback(() => {
+    // Fetch all tallies
+    fetch('/api/votes')
+      .then((r) => r.json())
+      .then((data) => setTallies(data))
+      .catch(() => {});
+
+    // Fetch user's votes if signed in
+    if (isSignedIn) {
+      fetch('/api/votes?mine=true')
+        .then((r) => r.json())
+        .then((records: { outfit_id: string; vote: 'hot' | 'not' }[]) => {
+          const voted = new Set<string>();
+          const voteMap: Record<string, 'hot' | 'not'> = {};
+          for (const r of records) {
+            voted.add(r.outfit_id);
+            voteMap[r.outfit_id] = r.vote;
+          }
+          setVotedIds(voted);
+          setMyVotes(voteMap);
+          setQueue(allOutfits.filter((o) => !voted.has(o.id)));
+        })
+        .catch(() => {});
+    } else {
+      // Not signed in — no voted state
+      setVotedIds(new Set());
+      setMyVotes({});
+      setQueue(allOutfits);
     }
-    setVotedIds(voted);
-    setVotes(voteMap);
-
-    const unrated = allOutfits.filter((o) => !voted.has(o.id));
-    setQueue(unrated);
-    setCurrentIndex(unrated.length > 0 ? 0 : null);
-  }, []);
+  }, [isSignedIn]);
 
   useEffect(() => {
-    buildQueue();
-  }, [buildQueue]);
+    refresh();
+  }, [refresh]);
 
   useEffect(() => {
-    const handler = () => {
-      setTimeout(() => buildQueue(), 300);
-    };
+    const handler = () => setTimeout(() => refresh(), 500);
     window.addEventListener('outfit-voted', handler);
     return () => window.removeEventListener('outfit-voted', handler);
-  }, [buildQueue]);
+  }, [refresh]);
 
-  const currentOutfit = currentIndex !== null ? queue[currentIndex] : null;
+  const currentOutfit = queue.length > 0 ? queue[0] : null;
 
   function getItemsForOutfit(outfit: Outfit): Item[] {
     return outfit.items
@@ -58,7 +71,6 @@ export default function Home() {
 
   const totalOutfits = allOutfits.length;
   const totalRated = votedIds.size;
-  const remaining = queue.length;
 
   return (
     <>
@@ -71,13 +83,15 @@ export default function Home() {
           <h1 className="txt-display-outline">Daily Fit</h1>
           <h2 className="txt-display-solid">Evaluation</h2>
         </div>
-        <p className="txt-meta opacity-60">
-          {totalRated} of {totalOutfits} rated
-          {remaining > 0 && <> &middot; {remaining} remaining</>}
-        </p>
+        {isSignedIn && (
+          <p className="txt-meta opacity-60">
+            {totalRated} of {totalOutfits} rated
+            {queue.length > 0 && <> &middot; {queue.length} remaining</>}
+          </p>
+        )}
       </div>
 
-      {/* Single outfit card (if unrated remain) */}
+      {/* Single outfit card (if unrated remain or not signed in) */}
       {currentOutfit ? (
         <div className="max-w-3xl mx-auto w-full">
           <OutfitCard
@@ -97,16 +111,25 @@ export default function Home() {
             Add outfits to data/outfits.json
           </p>
         </div>
+      ) : isSignedIn ? (
+        <div
+          className="relative z-10 text-center max-w-3xl mx-auto w-full"
+          style={{ padding: '48px var(--pad)' }}
+        >
+          <h2 className="txt-display-outline">All</h2>
+          <h3 className="txt-display-solid">Rated</h3>
+          <p className="txt-meta opacity-50 mt-4">
+            {totalRated} outfits evaluated &middot;{' '}
+            <Link href="/stats" className="underline hover:opacity-70">Check the stats</Link>
+          </p>
+        </div>
       ) : null}
 
-      {/* Archive Grid — always visible when there are rated outfits */}
-      {totalRated > 0 && (
+      {/* Archive Grid */}
+      {totalOutfits > 0 && (
         <section
           className="relative z-10 w-full"
-          style={{
-            borderTop: '1px solid var(--color-text)',
-            marginTop: currentOutfit ? '0' : '0',
-          }}
+          style={{ borderTop: '1px solid var(--color-text)' }}
         >
           <div
             className="max-w-3xl mx-auto w-full"
@@ -114,14 +137,16 @@ export default function Home() {
           >
             <div className="mb-6">
               <p className="txt-meta font-semibold uppercase opacity-60">
-                Archive &middot; {totalRated} rated
+                All Outfits &middot; {totalOutfits} total
               </p>
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
               {allOutfits.map((outfit) => {
-                const vote = votes[outfit.id];
-                const isRated = votedIds.has(outfit.id);
+                const vote = myVotes[outfit.id];
+                const tally = tallies[outfit.id];
+                const total = tally ? tally.hot + tally.not : 0;
+                const hotPct = total > 0 ? Math.round((tally.hot / total) * 100) : null;
 
                 return (
                   <Link
@@ -134,9 +159,21 @@ export default function Home() {
                         src={outfit.image}
                         alt={outfit.description || 'Outfit'}
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                        style={{ opacity: isRated ? 1 : 0.4 }}
                       />
-                      {/* Vote indicator */}
+                      {/* Score badge */}
+                      {hotPct !== null && (
+                        <div
+                          className="absolute top-1 right-1 px-1.5 py-0.5"
+                          style={{
+                            background: 'rgba(255,255,255,0.85)',
+                            fontSize: '8px',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {hotPct}%
+                        </div>
+                      )}
+                      {/* Your vote badge */}
                       {vote && (
                         <div
                           className="absolute bottom-1 right-1 px-1.5 py-0.5"
