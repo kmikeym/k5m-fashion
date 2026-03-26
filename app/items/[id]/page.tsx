@@ -18,13 +18,13 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
     <>
       {/* Header on cool gradient */}
       <section
-        className="relative z-10"
+        className="relative z-10 w-full"
         style={{
           background: 'var(--grad-cool)',
-          padding: '48px var(--pad) 32px',
           borderTop: '1px solid var(--color-text)',
         }}
       >
+      <div className="max-w-3xl mx-auto w-full" style={{ padding: '48px var(--pad) 32px' }}>
         <Link
           href="/items"
           className="txt-meta opacity-50 hover:opacity-100 transition-opacity"
@@ -39,12 +39,13 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
             Appears in {outfits.length} outfit{outfits.length !== 1 ? 's' : ''}
           </p>
         </div>
+      </div>
       </section>
 
-      {/* Outfits on warm gradient */}
+      {/* Outfits */}
       {outfits.length > 0 ? (
         outfits.map((outfit) => (
-          <div key={outfit.id} style={{ background: 'var(--grad-warm)' }}>
+          <div key={outfit.id} className="max-w-3xl mx-auto w-full">
             <OutfitCard
               outfit={outfit}
               items={getItemsForOutfit(outfit)}
@@ -53,11 +54,8 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         ))
       ) : (
         <div
-          className="relative z-10 text-center"
-          style={{
-            padding: '80px var(--pad)',
-            background: 'var(--grad-warm)',
-          }}
+          className="relative z-10 text-center max-w-3xl mx-auto w-full"
+          style={{ padding: '80px var(--pad)' }}
         >
           <p className="txt-meta opacity-50">No outfits yet with this item</p>
         </div>

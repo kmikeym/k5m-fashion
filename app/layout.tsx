@@ -34,13 +34,12 @@ export default function RootLayout({
       <body>
         <div className="noise-overlay" />
 
-        <div className="w-full max-w-[430px] md:max-w-[860px] relative overflow-x-hidden flex flex-col shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+        <div className="w-full relative overflow-x-hidden flex flex-col min-h-screen">
           {/* Header */}
           <header
-            className="flex justify-between items-start relative z-10"
+            className="flex justify-between items-start relative z-10 max-w-3xl mx-auto w-full"
             style={{
               padding: '48px var(--pad) 16px',
-              background: 'var(--grad-warm)',
             }}
           >
             <div className="flex flex-col">
@@ -76,10 +75,10 @@ export default function RootLayout({
 
           {/* Footer */}
           <div
-            className="relative z-10"
+            className="relative z-10 max-w-3xl mx-auto w-full"
             style={{
               padding: '48px var(--pad)',
-              borderTop: '1px solid var(--color-text)',
+              borderTop: '1px solid var(--color-line)',
             }}
           >
             <p className="txt-meta opacity-40">

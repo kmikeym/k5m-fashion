@@ -50,7 +50,6 @@ export default function StatsPage() {
 
         setTotalVotes(total);
 
-        // Compute pair synergies per item
         const itemIds = items.map((i) => i.id);
         const pairData: Record<string, { bestPair: { name: string; synergy: number } | null; worstPair: { name: string; synergy: number } | null }> = {};
 
@@ -91,10 +90,7 @@ export default function StatsPage() {
           name: item.name,
           category: item.category,
           appearances: stats[item.id]?.appearances || 0,
-          hotRate:
-            stats[item.id]?.total > 0
-              ? stats[item.id].hot / stats[item.id].total
-              : null,
+          hotRate: stats[item.id]?.total > 0 ? stats[item.id].hot / stats[item.id].total : null,
           totalVotes: stats[item.id]?.total || 0,
           bestPair: pairData[item.id]?.bestPair || null,
           worstPair: pairData[item.id]?.worstPair || null,
@@ -115,90 +111,89 @@ export default function StatsPage() {
 
   return (
     <section
-      className="relative z-10 flex flex-col"
+      className="relative z-10 flex flex-col w-full"
       style={{
         background: 'var(--grad-cool)',
-        padding: '64px var(--pad)',
-        minHeight: '100vh',
         borderTop: '1px solid var(--color-text)',
       }}
     >
-      {/* Header */}
-      <div className="mb-12">
-        <p className="txt-meta mb-4">System Intelligence</p>
-        <h2 className="txt-display-outline">Wardrobe</h2>
-        <h3 className="txt-display-solid">Correlations</h3>
-      </div>
+      <div className="max-w-3xl mx-auto w-full" style={{ padding: '64px var(--pad)' }}>
+        {/* Header */}
+        <div className="mb-12">
+          <p className="txt-meta mb-4">System Intelligence</p>
+          <h2 className="txt-display-outline">Wardrobe</h2>
+          <h3 className="txt-display-solid">Correlations</h3>
+        </div>
 
-      {/* Summary */}
-      <div className="flex gap-8 mb-12">
-        <div>
-          <span className="metric-val">{outfits.length}</span>
-          <p className="txt-meta font-semibold uppercase mt-1">Outfits</p>
+        {/* Summary */}
+        <div className="flex gap-8 mb-12">
+          <div>
+            <span className="metric-val">{outfits.length}</span>
+            <p className="txt-meta font-semibold uppercase mt-1">Outfits</p>
+          </div>
+          <div>
+            <span className="metric-val">{items.length}</span>
+            <p className="txt-meta font-semibold uppercase mt-1">Items</p>
+          </div>
+          <div>
+            <span className="metric-val">{totalVotes}</span>
+            <p className="txt-meta font-semibold uppercase mt-1">Votes</p>
+          </div>
         </div>
-        <div>
-          <span className="metric-val">{items.length}</span>
-          <p className="txt-meta font-semibold uppercase mt-1">Items</p>
-        </div>
-        <div>
-          <span className="metric-val">{totalVotes}</span>
-          <p className="txt-meta font-semibold uppercase mt-1">Votes</p>
-        </div>
-      </div>
 
-      {loading ? (
-        <p className="txt-meta opacity-50">Loading vote data...</p>
-      ) : totalVotes === 0 ? (
-        <div className="py-16">
-          <h2 className="txt-display-outline">No Votes</h2>
-          <h3 className="txt-display-solid">Yet</h3>
-          <p className="txt-meta opacity-50 mt-4">
-            Vote on some outfits to see correlations
-          </p>
-        </div>
-      ) : (
-        <div className="flex flex-col">
-          {itemStats.map((stat) => {
-            const score = stat.hotRate !== null ? Math.round(stat.hotRate * 100) : null;
-            const isLow = score !== null && score < 50;
-            // Show best synergy if positive, worst drag if negative
-            const synergy = stat.bestPair && stat.bestPair.synergy > 0
-              ? { type: 'Synergy', label: `+${stat.bestPair.synergy} w/ ${stat.bestPair.name}` }
-              : stat.worstPair && stat.worstPair.synergy < 0
-              ? { type: 'Drag', label: `${stat.worstPair.synergy} w/ ${stat.worstPair.name}` }
-              : null;
+        {loading ? (
+          <p className="txt-meta opacity-50">Loading vote data...</p>
+        ) : totalVotes === 0 ? (
+          <div className="py-16">
+            <h2 className="txt-display-outline">No Votes</h2>
+            <h3 className="txt-display-solid">Yet</h3>
+            <p className="txt-meta opacity-50 mt-4">
+              Vote on some outfits to see correlations
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            {itemStats.map((stat) => {
+              const score = stat.hotRate !== null ? Math.round(stat.hotRate * 100) : null;
+              const isLow = score !== null && score < 50;
+              const synergy = stat.bestPair && stat.bestPair.synergy > 0
+                ? { type: 'Synergy', label: `+${stat.bestPair.synergy} w/ ${stat.bestPair.name}` }
+                : stat.worstPair && stat.worstPair.synergy < 0
+                ? { type: 'Drag', label: `${stat.worstPair.synergy} w/ ${stat.worstPair.name}` }
+                : null;
 
-            return (
-              <div key={stat.id} className="data-row">
-                <div className="flex flex-col gap-1">
-                  <span className="text-lg font-bold leading-tight tracking-tight">
-                    {stat.name}
-                  </span>
-                  <span className="txt-meta uppercase opacity-70">
-                    {stat.category}
-                  </span>
-                  {synergy && (
-                    <div className="synergy-detail">
-                      <span>{synergy.type}</span>
-                      <span className="font-semibold">{synergy.label}</span>
+              return (
+                <div key={stat.id} className="data-row">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-lg font-bold leading-tight tracking-tight">
+                      {stat.name}
+                    </span>
+                    <span className="txt-meta uppercase opacity-70">
+                      {stat.category}
+                    </span>
+                    {synergy && (
+                      <div className="synergy-detail">
+                        <span>{synergy.type}</span>
+                        <span className="font-semibold">{synergy.label}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-6 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className={`metric-val ${isLow ? 'outline' : ''}`}>
+                        {score ?? '—'}
+                      </span>
+                      <span className="txt-meta font-semibold uppercase mt-1">
+                        Score
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="flex gap-6 text-right">
-                  <div className="flex flex-col items-end">
-                    <span className={`metric-val ${isLow ? 'outline' : ''}`}>
-                      {score ?? '—'}
-                    </span>
-                    <span className="txt-meta font-semibold uppercase mt-1">
-                      Score
-                    </span>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

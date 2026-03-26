@@ -7,14 +7,13 @@ export default function ItemsPage() {
 
   return (
     <section
-      className="relative z-10 flex flex-col"
+      className="relative z-10 flex flex-col w-full"
       style={{
         background: 'var(--grad-cool)',
-        padding: '64px var(--pad)',
-        minHeight: '100vh',
         borderTop: '1px solid var(--color-text)',
       }}
     >
+    <div className="max-w-3xl mx-auto w-full" style={{ padding: '64px var(--pad)' }}>
       <div className="mb-12">
         <p className="txt-meta mb-4">Full Inventory</p>
         <h2 className="txt-display-outline">The</h2>
@@ -62,6 +61,7 @@ export default function ItemsPage() {
           </p>
         </div>
       )}
+    </div>
     </section>
   );
 }

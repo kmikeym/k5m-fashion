@@ -22,13 +22,10 @@ export default async function OutfitPage({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      {/* Header on warm gradient */}
+      {/* Header */}
       <div
-        className="relative z-10"
-        style={{
-          padding: '0 var(--pad) 16px',
-          background: 'var(--grad-warm)',
-        }}
+        className="relative z-10 max-w-3xl mx-auto w-full"
+        style={{ padding: '0 var(--pad) 16px' }}
       >
         <Link
           href="/"
@@ -44,40 +41,41 @@ export default async function OutfitPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Outfit card */}
-      <div style={{ background: 'var(--grad-warm)' }}>
+      <div className="max-w-3xl mx-auto w-full">
         <OutfitCard outfit={outfit} items={items} />
       </div>
 
       {/* Wearing section on cool gradient */}
       <section
-        className="relative z-10"
+        className="relative z-10 w-full"
         style={{
           background: 'var(--grad-cool)',
-          padding: '48px var(--pad)',
           borderTop: '1px solid var(--color-text)',
         }}
       >
-        <p className="txt-meta font-semibold uppercase opacity-60 mb-4">
-          Wearing
-        </p>
-        <div className="flex flex-col">
-          {items.map((item) => (
-            <Link key={item.id} href={`/items/${item.id}`}>
-              <div className="data-row">
-                <div className="flex flex-col gap-1">
-                  <span className="text-lg font-bold leading-tight tracking-tight">
-                    {item.name}
-                  </span>
-                  <span className="txt-meta uppercase opacity-70">
-                    {item.category}
-                  </span>
+        <div className="max-w-3xl mx-auto w-full" style={{ padding: '48px var(--pad)' }}>
+          <p className="txt-meta font-semibold uppercase opacity-60 mb-4">
+            Wearing
+          </p>
+          <div className="flex flex-col">
+            {items.map((item) => (
+              <Link key={item.id} href={`/items/${item.id}`}>
+                <div className="data-row">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-lg font-bold leading-tight tracking-tight">
+                      {item.name}
+                    </span>
+                    <span className="txt-meta uppercase opacity-70">
+                      {item.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="txt-meta opacity-40">&rarr;</span>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <span className="txt-meta opacity-40">&rarr;</span>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
     </>

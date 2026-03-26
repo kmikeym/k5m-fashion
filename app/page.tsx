@@ -6,13 +6,10 @@ export default function Home() {
 
   return (
     <>
-      {/* Hero — warm gradient */}
+      {/* Hero */}
       <div
-        className="relative z-10"
-        style={{
-          padding: '0 var(--pad) 24px',
-          background: 'var(--grad-warm)',
-        }}
+        className="relative z-10 max-w-3xl mx-auto w-full"
+        style={{ padding: '0 var(--pad) 24px' }}
       >
         <div className="mb-6">
           <h1 className="txt-display-outline">Daily Fit</h1>
@@ -20,14 +17,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Outfits on warm gradient */}
+      {/* Outfits */}
       {outfits.length === 0 ? (
         <div
-          className="relative z-10 text-center"
-          style={{
-            padding: '80px var(--pad)',
-            background: 'var(--grad-warm)',
-          }}
+          className="relative z-10 text-center max-w-3xl mx-auto w-full"
+          style={{ padding: '80px var(--pad)' }}
         >
           <h2 className="txt-display-outline">No Fits</h2>
           <h3 className="txt-display-solid">Yet</h3>
@@ -36,17 +30,15 @@ export default function Home() {
           </p>
         </div>
       ) : (
-        outfits.map((outfit) => (
-          <div
-            key={outfit.id}
-            style={{ background: 'var(--grad-warm)' }}
-          >
+        <div className="max-w-3xl mx-auto w-full">
+          {outfits.map((outfit) => (
             <OutfitCard
+              key={outfit.id}
               outfit={outfit}
               items={getItemsForOutfit(outfit)}
             />
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </>
   );
