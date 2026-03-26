@@ -66,7 +66,17 @@ export default function OutfitCard({
       <div style={{ padding: '0 var(--pad)' }}>
         <Link href={`/outfits/${outfit.id}`}>
           <div className="fit-photo-container">
-            <img src={outfit.image} alt={outfit.description} />
+            <img src={outfit.image} alt={outfit.description || 'Outfit'} />
+            {/* Date badge */}
+            <div className="absolute top-3 left-3">
+              <span className="photo-tag">
+                {new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
             <div className="absolute bottom-3 left-3 flex flex-col gap-1">
               {items.length === 0 ? (
                 <span className="photo-tag" style={{ opacity: 0.5 }}>
@@ -90,12 +100,16 @@ export default function OutfitCard({
         </Link>
 
         {/* Description */}
-        <div className="mt-3 mb-4">
-          <p className="text-sm font-medium">{outfit.description}</p>
-          {outfit.location && (
-            <p className="txt-meta opacity-50 mt-1">{outfit.location}</p>
-          )}
-        </div>
+        {(outfit.description || outfit.location) && (
+          <div className="mt-3 mb-4">
+            {outfit.description && (
+              <p className="text-sm font-medium">{outfit.description}</p>
+            )}
+            {outfit.location && (
+              <p className="txt-meta opacity-50 mt-1">{outfit.location}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Vote buttons */}

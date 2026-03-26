@@ -83,7 +83,6 @@ body {
 /* Photo treatment */
 .fit-photo-container {
   width: 100%;
-  aspect-ratio: 4/5;
   background-color: #d8d8d8;
   position: relative;
   overflow: hidden;
@@ -92,8 +91,8 @@ body {
 
 .fit-photo-container img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  display: block;
   mix-blend-mode: luminosity;
   opacity: 0.9;
 }
