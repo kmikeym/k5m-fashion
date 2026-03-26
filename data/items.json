@@ -28,5 +28,65 @@
     "name": "White Sneakers",
     "category": "shoes",
     "image": "/items/white-sneakers.jpg"
+  },
+  {
+    "id": "blue-crane-tee",
+    "name": "Blue Crane Tee",
+    "category": "tops",
+    "image": "/items/blue-crane-tee.jpg"
+  },
+  {
+    "id": "carharrt-tan-la-dodgers-hat",
+    "name": "Carharrt Tan LA Dodgers Hat",
+    "category": "hats",
+    "image": "/items/carharrt-tan-la-dodgers-hat.jpg"
+  },
+  {
+    "id": "black-distressed-carharrt-work-pants",
+    "name": "Black Distressed Carharrt Work Pants",
+    "category": "bottoms",
+    "image": "/items/black-distressed-carharrt-work-pants.jpg"
+  },
+  {
+    "id": "black-tom-ford-eyeglasses",
+    "name": "Black Tom Ford Eyeglasses",
+    "category": "accessories",
+    "image": "/items/black-tom-ford-eyeglasses.jpg"
+  },
+  {
+    "id": "nasa-space-suit",
+    "name": "NASA Space Suit",
+    "category": "outerwear",
+    "image": "/items/nasa-space-suit.jpg"
+  },
+  {
+    "id": "blue-work-systems-tee",
+    "name": "Blue \"Work Systems\" Tee",
+    "category": "tops",
+    "image": "/items/blue-work-systems-tee.jpg"
+  },
+  {
+    "id": "roka-falcon-aviator-prescription-sunglasses",
+    "name": "Roka Falcon Aviator Prescription Sunglasses",
+    "category": "accessories",
+    "image": "/items/roka-falcon-aviator-prescription-sunglasses.jpg"
+  },
+  {
+    "id": "tuxedo",
+    "name": "Tuxedo",
+    "category": "outerwear",
+    "image": "/items/tuxedo.jpg"
+  },
+  {
+    "id": "black-tee",
+    "name": "Black Tee",
+    "category": "tops",
+    "image": "/items/black-tee.jpg"
+  },
+  {
+    "id": "black-flight-jacket",
+    "name": "Black Flight Jacket",
+    "category": "outerwear",
+    "image": "/items/black-flight-jacket.jpg"
   }
 ]

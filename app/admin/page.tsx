@@ -14,6 +14,8 @@ export default function AdminPage() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemCategory, setNewItemCategory] = useState<string>('tops');
   const [saving, setSaving] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -50,6 +52,27 @@ export default function AdminPage() {
       setShowNewItem(false);
     }
     setSaving(false);
+  }
+
+  async function saveField(outfitId: string, field: string, value: string) {
+    setSaving(true);
+    const res = await fetch(`/api/outfits/${outfitId}/details`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: value }),
+    });
+    if (res.ok) {
+      setOutfits((prev) =>
+        prev.map((o) => (o.id === outfitId ? { ...o, [field]: value } : o))
+      );
+    }
+    setEditingField(null);
+    setSaving(false);
+  }
+
+  function startEdit(key: string, currentValue: string) {
+    setEditingField(key);
+    setEditValue(currentValue);
   }
 
   async function toggleItem(outfitId: string, itemId: string) {
@@ -167,7 +190,7 @@ export default function AdminPage() {
               onClick={() => setEditingOutfit(isEditing ? null : outfit.id)}
             >
               {/* Thumbnail */}
-              <div className="w-16 h-20 flex-shrink-0 overflow-hidden border border-ink/20">
+              <div className="w-48 h-60 flex-shrink-0 overflow-hidden border border-ink/20">
                 <img
                   src={outfit.image}
                   alt=""
@@ -175,12 +198,81 @@ export default function AdminPage() {
                 />
               </div>
               {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="txt-meta opacity-60">{formattedDate}</p>
-                <p className="text-sm font-bold leading-tight mt-0.5">
-                  {outfit.description || 'Untitled'}
-                </p>
-                <div className="flex flex-wrap gap-1 mt-1.5">
+              <div className="flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+                {/* Description — editable */}
+                {editingField === `${outfit.id}-description` ? (
+                  <input
+                    type="text"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => saveField(outfit.id, 'description', editValue)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveField(outfit.id, 'description', editValue);
+                      if (e.key === 'Escape') setEditingField(null);
+                    }}
+                    autoFocus
+                    className="w-full border border-ink/20 bg-transparent px-2 py-1 text-sm font-bold outline-none focus:border-ink"
+                    placeholder="Add a title..."
+                  />
+                ) : (
+                  <p
+                    className="text-sm font-bold leading-tight cursor-text hover:opacity-70 transition-opacity"
+                    onClick={() => startEdit(`${outfit.id}-description`, outfit.description || '')}
+                  >
+                    {outfit.description || <span className="opacity-30 italic font-normal">Tap to add title...</span>}
+                  </p>
+                )}
+
+                {/* Date + Location — editable */}
+                <div className="flex gap-3 mt-1">
+                  {editingField === `${outfit.id}-date` ? (
+                    <input
+                      type="date"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => saveField(outfit.id, 'date', editValue)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveField(outfit.id, 'date', editValue);
+                        if (e.key === 'Escape') setEditingField(null);
+                      }}
+                      autoFocus
+                      className="border border-ink/20 bg-transparent px-2 py-0.5 txt-meta outline-none focus:border-ink"
+                    />
+                  ) : (
+                    <span
+                      className="txt-meta opacity-60 cursor-text hover:opacity-100 transition-opacity"
+                      onClick={() => startEdit(`${outfit.id}-date`, outfit.date)}
+                    >
+                      {formattedDate}
+                    </span>
+                  )}
+
+                  {editingField === `${outfit.id}-location` ? (
+                    <input
+                      type="text"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => saveField(outfit.id, 'location', editValue)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveField(outfit.id, 'location', editValue);
+                        if (e.key === 'Escape') setEditingField(null);
+                      }}
+                      autoFocus
+                      placeholder="Location..."
+                      className="border border-ink/20 bg-transparent px-2 py-0.5 txt-meta outline-none focus:border-ink"
+                    />
+                  ) : (
+                    <span
+                      className="txt-meta opacity-40 cursor-text hover:opacity-100 transition-opacity"
+                      onClick={() => startEdit(`${outfit.id}-location`, outfit.location || '')}
+                    >
+                      {outfit.location || 'Add location'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1 mt-1.5" onClick={() => setEditingOutfit(isEditing ? null : outfit.id)}>
                   {outfitItems.length === 0 ? (
                     <span className="txt-meta opacity-30 italic">No items tagged</span>
                   ) : (
@@ -203,7 +295,7 @@ export default function AdminPage() {
 
             {/* Item picker (expanded) */}
             {isEditing && (
-              <div className="mt-4 ml-20">
+              <div className="mt-4 ml-36">
                 <p className="txt-meta font-semibold uppercase opacity-60 mb-2">
                   Tap to toggle items:
                 </p>
