@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { SignInButton, UserButton } from '@clerk/nextjs';
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import { SignedIn, SignedOut } from './AuthGate';
+
+const ADMIN_EMAIL = 'kmikeym@kmikeym.com';
 
 function CircularStamp() {
   return (
@@ -22,6 +24,9 @@ function CircularStamp() {
 }
 
 export default function Header() {
+  const { user } = useUser();
+  const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
+
   return (
     <header
       className="flex justify-between items-start relative z-10 max-w-3xl mx-auto w-full"
@@ -41,11 +46,11 @@ export default function Header() {
           <Link href="/stats" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
             Stats
           </Link>
-          <SignedIn>
+          {isAdmin && (
             <Link href="/admin" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
               Admin
             </Link>
-          </SignedIn>
+          )}
         </nav>
       </div>
 

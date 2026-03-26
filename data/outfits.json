@@ -52,7 +52,7 @@
     "id": "img-3759",
     "date": "2025-04-01",
     "image": "/outfits/IMG_3759.jpeg",
-    "description": "",
+    "description": "Buff Boys on Bikes",
     "items": [],
     "location": ""
   },
@@ -72,7 +72,7 @@
     "id": "img-1530",
     "date": "2025-02-01",
     "image": "/outfits/IMG_1530.jpeg",
-    "description": "",
+    "description": "Aspirational",
     "items": [],
     "location": ""
   },
@@ -80,7 +80,7 @@
     "id": "img-1447",
     "date": "2025-01-01",
     "image": "/outfits/IMG_1447.jpeg",
-    "description": "",
+    "description": "Young Mike",
     "items": [],
     "location": ""
   },
@@ -88,7 +88,7 @@
     "id": "img-0950",
     "date": "2024-12-01",
     "image": "/outfits/IMG_0950.jpeg",
-    "description": "",
+    "description": "Dress For the Job You Want",
     "items": [
       "tuxedo"
     ],
@@ -98,7 +98,7 @@
     "id": "img-0784",
     "date": "2024-11-01",
     "image": "/outfits/IMG_0784.jpeg",
-    "description": "",
+    "description": "Go Badgers!",
     "items": [],
     "location": ""
   },
@@ -106,16 +106,21 @@
     "id": "img-0477",
     "date": "2024-10-01",
     "image": "/outfits/IMG_0477.jpeg",
-    "description": "",
-    "items": [],
+    "description": "Dramatic Lighting",
+    "items": [
+      "black-tom-ford-eyeglasses"
+    ],
     "location": ""
   },
   {
     "id": "leben-mike",
     "date": "2023-01-01",
     "image": "/outfits/23_Leben_Mike_01.jpg",
-    "description": "",
-    "items": [],
+    "description": "Regular Guy",
+    "items": [
+      "black-flight-jacket",
+      "black-tom-ford-eyeglasses"
+    ],
     "location": ""
   },
   {

@@ -2,11 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useUser } from '@clerk/nextjs';
 import type { Outfit, Item } from '@/lib/types';
 
 const CATEGORIES = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories', 'hats'] as const;
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'kmikeym@kmikeym.com';
 
 export default function AdminPage() {
+  const { user, isLoaded } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const isAdmin = userEmail === ADMIN_EMAIL;
+
+  if (!isLoaded) return null;
+
+  if (!isAdmin) {
+    return (
+      <div
+        className="relative z-10 text-center max-w-3xl mx-auto w-full"
+        style={{ padding: '80px var(--pad)' }}
+      >
+        <h2 className="txt-display-outline">Access</h2>
+        <h3 className="txt-display-solid">Denied</h3>
+        <p className="txt-meta opacity-50 mt-4">
+          Admin is restricted to the wardrobe owner.
+        </p>
+      </div>
+    );
+  }
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [editingOutfit, setEditingOutfit] = useState<string | null>(null);
