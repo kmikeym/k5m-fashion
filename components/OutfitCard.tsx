@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useUser, SignInButton } from '@clerk/nextjs';
 import type { Outfit, Item } from '@/lib/types';
 
 interface OutfitCardProps {
@@ -15,6 +16,7 @@ export default function OutfitCard({
   items,
   showVoting = true,
 }: OutfitCardProps) {
+  const { isSignedIn } = useUser();
   const [voted, setVoted] = useState<'hot' | 'not' | null>(null);
   const [hotCount, setHotCount] = useState(0);
   const [notCount, setNotCount] = useState(0);
@@ -116,7 +118,22 @@ export default function OutfitCard({
       </div>
 
       {/* Vote buttons */}
-      {showVoting && !voted ? (
+      {showVoting && !isSignedIn ? (
+        <div
+          className="relative z-10 text-center"
+          style={{
+            padding: '20px var(--pad)',
+            borderTop: '1px solid var(--color-text)',
+            borderBottom: '1px solid var(--color-text)',
+          }}
+        >
+          <SignInButton mode="modal">
+            <button className="txt-meta font-bold uppercase tracking-wider hover:opacity-70 transition-opacity cursor-pointer">
+              Sign in to vote
+            </button>
+          </SignInButton>
+        </div>
+      ) : showVoting && !voted ? (
         <div className="voting-actions">
           <button
             onClick={() => vote('not')}
