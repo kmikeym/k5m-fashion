@@ -40,9 +40,37 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
         <div>
           <p className="txt-meta uppercase opacity-60 mb-2">{item.category}</p>
           <h2 className="txt-display-solid">{getDisplayName(item)}</h2>
+
+          {/* Metadata */}
+          <div className="flex flex-wrap gap-3 mt-2">
+            {item.brand && (
+              <span className="txt-meta opacity-40">{item.brand}</span>
+            )}
+            {item.size && (
+              <span className="txt-meta opacity-40">Size {item.size}</span>
+            )}
+            <span className="status-badge">{item.status}</span>
+          </div>
+
           <p className="txt-meta opacity-50 mt-2">
             Appears in {outfits.length} outfit{outfits.length !== 1 ? 's' : ''}
           </p>
+
+          {/* Tags */}
+          {item.tags && item.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-3">
+              {item.tags.map((tag) => (
+                <span key={tag} className="status-badge opacity-60">{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {/* Notes */}
+          {item.notes && (
+            <p className="text-sm opacity-60 mt-3" style={{ maxWidth: '40ch' }}>
+              {item.notes}
+            </p>
+          )}
         </div>
       </div>
       </section>

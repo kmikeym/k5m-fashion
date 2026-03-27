@@ -34,12 +34,18 @@ export default function AdminPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [editingOutfit, setEditingOutfit] = useState<string | null>(null);
   const [showNewItem, setShowNewItem] = useState(false);
-  const [newItemName, setNewItemName] = useState('');
+  const [newItemType, setNewItemType] = useState('');
+  const [newItemColor, setNewItemColor] = useState('');
+  const [newItemModifier, setNewItemModifier] = useState('');
+  const [newItemBrand, setNewItemBrand] = useState('');
+  const [newItemSize, setNewItemSize] = useState('');
   const [newItemCategory, setNewItemCategory] = useState<string>('tops');
+  const [newItemStatus, setNewItemStatus] = useState<string>('owned');
   const [saving, setSaving] = useState(false);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   async function refreshOutfits() {
     // Fetch fresh from the JSON file via a cache-busting import
@@ -99,19 +105,33 @@ export default function AdminPage() {
     setItems(data as Item[]);
   }
 
+  const newItemPreview = [newItemColor, newItemModifier, newItemType].filter(Boolean).join(' ') || 'Item Name Preview';
+
   async function addNewItem() {
-    if (!newItemName.trim()) return;
+    if (!newItemType.trim()) return;
     setSaving(true);
 
     const res = await fetch('/api/items', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: newItemName.trim(), category: newItemCategory }),
+      body: JSON.stringify({
+        type: newItemType.trim(),
+        color: newItemColor.trim() || undefined,
+        modifier: newItemModifier.trim() || undefined,
+        brand: newItemBrand.trim() || undefined,
+        size: newItemSize.trim() || undefined,
+        category: newItemCategory,
+        status: newItemStatus,
+      }),
     });
 
     if (res.ok) {
       await refreshItems();
-      setNewItemName('');
+      setNewItemType('');
+      setNewItemColor('');
+      setNewItemModifier('');
+      setNewItemBrand('');
+      setNewItemSize('');
       setShowNewItem(false);
     }
     setSaving(false);
@@ -165,7 +185,24 @@ export default function AdminPage() {
     setSaving(false);
   }
 
+  // Close lightbox on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxImage(null);
+    };
+    if (lightboxImage) window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightboxImage]);
+
   return (
+    <>
+    {/* Lightbox */}
+    {lightboxImage && (
+      <div className="lightbox-overlay" onClick={() => setLightboxImage(null)}>
+        <img src={lightboxImage} alt="Full size outfit" />
+      </div>
+    )}
+
     <div
       className="relative z-10 max-w-3xl mx-auto w-full"
       style={{ padding: '0 var(--pad) 48px' }}
@@ -218,40 +255,106 @@ export default function AdminPage() {
         </div>
 
         {showNewItem && (
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <label className="txt-meta opacity-50 block mb-1">Name</label>
-              <input
-                type="text"
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                placeholder="LA Dodgers Cap"
-                className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm font-primary outline-none focus:border-ink"
-                onKeyDown={(e) => e.key === 'Enter' && addNewItem()}
-              />
+          <div className="flex flex-col gap-3">
+            {/* Live preview */}
+            <div className="text-lg font-bold tracking-tight" style={{ opacity: newItemType ? 1 : 0.3 }}>
+              {newItemPreview}
+              {newItemBrand && <span className="txt-meta opacity-40 ml-2">{newItemBrand}</span>}
             </div>
-            <div>
-              <label className="txt-meta opacity-50 block mb-1">Category</label>
-              <select
-                value={newItemCategory}
-                onChange={(e) => setNewItemCategory(e.target.value)}
-                className="border border-ink/20 bg-transparent px-3 py-2 text-sm font-primary outline-none focus:border-ink"
+
+            {/* Row 1: Type (required) + Color + Modifier */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <label className="txt-meta opacity-50 block mb-1">Type *</label>
+                <input
+                  type="text"
+                  value={newItemType}
+                  onChange={(e) => setNewItemType(e.target.value)}
+                  placeholder="Jeans, Hat, Tee..."
+                  className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                  onKeyDown={(e) => e.key === 'Enter' && addNewItem()}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="txt-meta opacity-50 block mb-1">Color</label>
+                <input
+                  type="text"
+                  value={newItemColor}
+                  onChange={(e) => setNewItemColor(e.target.value)}
+                  placeholder="Black, Blue..."
+                  className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="txt-meta opacity-50 block mb-1">Modifier</label>
+                <input
+                  type="text"
+                  value={newItemModifier}
+                  onChange={(e) => setNewItemModifier(e.target.value)}
+                  placeholder="Slim, LA Dodgers..."
+                  className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Brand + Size + Category + Status */}
+            <div className="flex gap-2 items-end">
+              <div>
+                <label className="txt-meta opacity-50 block mb-1">Brand</label>
+                <input
+                  type="text"
+                  value={newItemBrand}
+                  onChange={(e) => setNewItemBrand(e.target.value)}
+                  placeholder="Carhartt..."
+                  className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                  style={{ width: 120 }}
+                />
+              </div>
+              <div>
+                <label className="txt-meta opacity-50 block mb-1">Size</label>
+                <input
+                  type="text"
+                  value={newItemSize}
+                  onChange={(e) => setNewItemSize(e.target.value)}
+                  placeholder="M, 32..."
+                  className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                  style={{ width: 80 }}
+                />
+              </div>
+              <div>
+                <label className="txt-meta opacity-50 block mb-1">Category</label>
+                <select
+                  value={newItemCategory}
+                  onChange={(e) => setNewItemCategory(e.target.value)}
+                  className="border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="txt-meta opacity-50 block mb-1">Status</label>
+                <select
+                  value={newItemStatus}
+                  onChange={(e) => setNewItemStatus(e.target.value)}
+                  className="border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                >
+                  <option value="owned">owned</option>
+                  <option value="packed">packed</option>
+                  <option value="wishlist">wishlist</option>
+                  <option value="retired">retired</option>
+                </select>
+              </div>
+              <button
+                onClick={addNewItem}
+                disabled={saving || !newItemType.trim()}
+                className="photo-tag cursor-pointer hover:opacity-70 transition-opacity py-2 px-4"
+                style={{ fontSize: '12px' }}
               >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                Add
+              </button>
             </div>
-            <button
-              onClick={addNewItem}
-              disabled={saving || !newItemName.trim()}
-              className="photo-tag cursor-pointer hover:opacity-70 transition-opacity py-2 px-4"
-              style={{ fontSize: '12px' }}
-            >
-              Add
-            </button>
           </div>
         )}
       </div>
@@ -275,8 +378,11 @@ export default function AdminPage() {
               className="flex gap-4 cursor-pointer"
               onClick={() => setEditingOutfit(isEditing ? null : outfit.id)}
             >
-              {/* Thumbnail */}
-              <div className="w-48 h-60 flex-shrink-0 overflow-hidden border border-ink/20">
+              {/* Thumbnail — click for lightbox */}
+              <div
+                className="w-48 h-60 flex-shrink-0 overflow-hidden border border-ink/20 cursor-zoom-in"
+                onClick={(e) => { e.stopPropagation(); setLightboxImage(outfit.image); }}
+              >
                 <img
                   src={outfit.image}
                   alt=""
@@ -441,5 +547,6 @@ export default function AdminPage() {
         );
       })}
     </div>
+    </>
   );
 }
