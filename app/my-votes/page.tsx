@@ -110,6 +110,20 @@ export default function MyVotesPage() {
                         src={outfit.image}
                         alt={outfit.description || 'Outfit'}
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          const parent = img.parentElement;
+                          if (parent) {
+                            img.style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'outfit-img-fallback';
+                            const label = document.createElement('span');
+                            label.className = 'txt-meta font-bold';
+                            label.textContent = new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            fallback.appendChild(label);
+                            parent.insertBefore(fallback, parent.firstChild);
+                          }
+                        }}
                       />
                       <div
                         className="absolute bottom-1 right-1 px-1.5 py-0.5"

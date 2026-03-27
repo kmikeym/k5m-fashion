@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getOutfit, getOutfits, getItemsForOutfit } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import OutfitCard from '@/components/OutfitCard';
+import ItemImage from '@/components/ItemImage';
 
 export function generateStaticParams() {
   return getOutfits().map((o) => ({ id: o.id }));
@@ -60,7 +61,8 @@ export default async function OutfitPage({ params }: { params: Promise<{ id: str
           <div className="flex flex-col">
             {items.map((item) => (
               <Link key={item.id} href={`/items/${item.id}`}>
-                <div className="data-row">
+                <div className="data-row" style={{ gridTemplateColumns: 'auto 1fr auto' }}>
+                  <ItemImage item={item} size="sm" />
                   <div className="flex flex-col gap-1">
                     <span className="text-lg font-bold leading-tight tracking-tight">
                       {item.name}

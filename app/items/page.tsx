@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getItems, getOutfitsForItem } from '@/lib/data';
+import ItemImage from '@/components/ItemImage';
 
 export default function ItemsPage() {
   const items = getItems();
@@ -32,7 +33,8 @@ export default function ItemsPage() {
                 const outfitCount = getOutfitsForItem(item.id).length;
                 return (
                   <Link key={item.id} href={`/items/${item.id}`}>
-                    <div className="data-row">
+                    <div className="data-row" style={{ gridTemplateColumns: 'auto 1fr auto' }}>
+                      <ItemImage item={item} size="sm" />
                       <div className="flex flex-col gap-1">
                         <span className="text-lg font-bold leading-tight tracking-tight">
                           {item.name}

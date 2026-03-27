@@ -19,13 +19,16 @@ export default function Home() {
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
   const [myVotes, setMyVotes] = useState<Record<string, 'hot' | 'not'>>({});
   const [tallies, setTallies] = useState<Record<string, { hot: number; not: number }>>({});
+  const [fetchError, setFetchError] = useState(false);
 
   const refresh = useCallback(() => {
+    setFetchError(false);
+
     // Fetch all tallies
     fetch('/api/votes')
       .then((r) => r.json())
       .then((data) => setTallies(data as Record<string, { hot: number; not: number }>))
-      .catch(() => {});
+      .catch(() => setFetchError(true));
 
     // Fetch user's votes if signed in
     if (isSignedIn) {
@@ -43,7 +46,7 @@ export default function Home() {
           setMyVotes(voteMap);
           setQueue(allOutfits.filter((o) => !voted.has(o.id)));
         })
-        .catch(() => {});
+        .catch(() => setFetchError(true));
     } else {
       // Not signed in — no voted state
       setVotedIds(new Set());
@@ -126,6 +129,16 @@ export default function Home() {
         </div>
       ) : null}
 
+      {/* Fetch error */}
+      {fetchError && (
+        <div
+          className="relative z-10 text-center max-w-3xl mx-auto w-full"
+          style={{ padding: '8px var(--pad)' }}
+        >
+          <span className="txt-meta opacity-50">Couldn&apos;t load vote data — try refreshing</span>
+        </div>
+      )}
+
       {/* Archive Grid */}
       {totalOutfits > 0 && (
         <section
@@ -160,6 +173,20 @@ export default function Home() {
                         src={outfit.image}
                         alt={outfit.description || 'Outfit'}
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          const parent = img.parentElement;
+                          if (parent) {
+                            img.style.display = 'none';
+                            const fallback = document.createElement('div');
+                            fallback.className = 'outfit-img-fallback';
+                            const label = document.createElement('span');
+                            label.className = 'txt-meta font-bold';
+                            label.textContent = new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            fallback.appendChild(label);
+                            parent.insertBefore(fallback, parent.firstChild);
+                          }
+                        }}
                       />
                       {/* Score badge */}
                       {hotPct !== null && (

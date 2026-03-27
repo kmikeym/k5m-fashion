@@ -20,6 +20,7 @@ export default function StatsPage() {
   const [itemStats, setItemStats] = useState<ItemStat[]>([]);
   const [totalVotes, setTotalVotes] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
   const outfits = outfitsData as Outfit[];
   const items = itemsData as Item[];
@@ -107,7 +108,10 @@ export default function StatsPage() {
         setItemStats(computed);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setFetchError(true);
+        setLoading(false);
+      });
   }, []);
 
   return (
@@ -144,6 +148,8 @@ export default function StatsPage() {
 
         {loading ? (
           <p className="txt-meta opacity-50">Loading vote data...</p>
+        ) : fetchError ? (
+          <p className="txt-meta opacity-50">Couldn&apos;t load vote data — try refreshing</p>
         ) : totalVotes === 0 ? (
           <div className="py-16">
             <h2 className="txt-display-outline">No Votes</h2>

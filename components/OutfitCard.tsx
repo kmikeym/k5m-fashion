@@ -21,6 +21,8 @@ export default function OutfitCard({
   const [hotCount, setHotCount] = useState(0);
   const [notCount, setNotCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [voteError, setVoteError] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     fetch(`/api/votes?outfit_id=${outfit.id}`)
@@ -37,6 +39,7 @@ export default function OutfitCard({
   async function vote(choice: 'hot' | 'not') {
     if (voted || loading) return;
     setLoading(true);
+    setVoteError(false);
 
     try {
       const res = await fetch('/api/vote', {
@@ -48,22 +51,26 @@ export default function OutfitCard({
         }),
       });
 
-      if (res.status === 409) {
-        // Already voted — just update state
+      if (res.ok || res.status === 409) {
         setVoted(choice);
+        if (res.ok) {
+          if (choice === 'hot') setHotCount((c) => c + 1);
+          else setNotCount((c) => c + 1);
+        }
         setLoading(false);
+        window.dispatchEvent(new CustomEvent('outfit-voted'));
         return;
       }
+
+      // Non-OK, non-409 response
+      setVoteError(true);
+      setTimeout(() => setVoteError(false), 4000);
     } catch {
-      // offline
+      setVoteError(true);
+      setTimeout(() => setVoteError(false), 4000);
     }
 
-    setVoted(choice);
-    if (choice === 'hot') setHotCount((c) => c + 1);
-    else setNotCount((c) => c + 1);
     setLoading(false);
-
-    window.dispatchEvent(new CustomEvent('outfit-voted'));
   }
 
   const total = hotCount + notCount;
@@ -75,7 +82,22 @@ export default function OutfitCard({
       <div style={{ padding: '0 var(--pad)' }}>
         <Link href={`/outfits/${outfit.id}`}>
           <div className="fit-photo-container">
-            <img src={outfit.image} alt={outfit.description || 'Outfit'} />
+            {imgError ? (
+              <div className="outfit-img-fallback" style={{ aspectRatio: '3/4' }}>
+                <span className="txt-display-outline" style={{ fontSize: 24 }}>
+                  {new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+              </div>
+            ) : (
+              <img
+                src={outfit.image}
+                alt={outfit.description || 'Outfit'}
+                onError={() => setImgError(true)}
+              />
+            )}
             {/* Date badge */}
             <div className="absolute top-3 left-3">
               <span className="photo-tag">
@@ -140,6 +162,13 @@ export default function OutfitCard({
           </div>
         )}
       </div>
+
+      {/* Vote error */}
+      {voteError && (
+        <div className="text-center" style={{ padding: '8px var(--pad)' }}>
+          <span className="txt-meta opacity-60">Couldn&apos;t save vote — try again</span>
+        </div>
+      )}
 
       {/* Vote buttons */}
       {!isLoaded ? null : showVoting && !isSignedIn ? (

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import { SignedIn, SignedOut } from './AuthGate';
 
-const ADMIN_EMAIL = 'kmikeym@kmikeym.com';
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'kmikeym@kmikeym.com';
 
 function CircularStamp() {
   return (

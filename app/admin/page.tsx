@@ -280,6 +280,20 @@ export default function AdminPage() {
                   src={outfit.image}
                   alt=""
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const img = e.currentTarget;
+                    const parent = img.parentElement;
+                    if (parent) {
+                      img.style.display = 'none';
+                      const fallback = document.createElement('div');
+                      fallback.className = 'outfit-img-fallback';
+                      const label = document.createElement('span');
+                      label.className = 'txt-meta font-bold';
+                      label.textContent = formattedDate;
+                      fallback.appendChild(label);
+                      parent.insertBefore(fallback, parent.firstChild);
+                    }
+                  }}
                 />
               </div>
               {/* Info */}

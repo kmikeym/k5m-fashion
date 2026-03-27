@@ -39,6 +39,6 @@ Push to `main`. Cloudflare Pages auto-deploys.
 - `GET /api/votes` — returns all tallies
 
 ## TODO
-- [ ] Wire D1 database for production votes (replace in-memory store)
-- [ ] Add placeholder images for seed data
-- [ ] Shareholder authentication for weighted votes
+- [x] Wire D1 database for production votes (done — commit 1cc6c01)
+- [x] Add placeholder images for seed data (done — ItemImage component with fallback)
+- [ ] Shareholder authentication for weighted votes (deferred — future feature)
