@@ -46,6 +46,8 @@ export default function AdminPage() {
   const [editValue, setEditValue] = useState('');
   const [uploading, setUploading] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [packMode, setPackMode] = useState(false);
+  const [packSelection, setPackSelection] = useState<Set<string>>(new Set());
 
   async function refreshOutfits() {
     // Fetch fresh from the JSON file via a cache-busting import
@@ -355,6 +357,100 @@ export default function AdminPage() {
                 Add
               </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Pack Items */}
+      <div className="mb-10" style={{ borderBottom: '1px solid var(--color-text)', paddingBottom: '24px' }}>
+        <div className="flex justify-between items-center mb-3">
+          <p className="txt-meta font-semibold uppercase">
+            Pack / Unpack
+          </p>
+          <div className="flex gap-3">
+            {packMode && packSelection.size > 0 && (
+              <button
+                onClick={async () => {
+                  setSaving(true);
+                  for (const itemId of packSelection) {
+                    await fetch('/api/items', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: itemId, status: 'packed' }),
+                    });
+                  }
+                  await refreshItems();
+                  setPackSelection(new Set());
+                  setPackMode(false);
+                  setSaving(false);
+                }}
+                disabled={saving}
+                className="photo-tag cursor-pointer hover:opacity-70 transition-opacity py-1 px-3"
+                style={{ fontSize: '11px' }}
+              >
+                Pack {packSelection.size} item{packSelection.size !== 1 ? 's' : ''}
+              </button>
+            )}
+            {items.some((i) => (i as Item & { status?: string }).status === 'packed') && (
+              <button
+                onClick={async () => {
+                  setSaving(true);
+                  const packed = items.filter((i) => (i as Item & { status?: string }).status === 'packed');
+                  for (const item of packed) {
+                    await fetch('/api/items', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ id: item.id, status: 'owned' }),
+                    });
+                  }
+                  await refreshItems();
+                  setSaving(false);
+                }}
+                disabled={saving}
+                className="txt-meta font-bold uppercase opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                Unpack All
+              </button>
+            )}
+            <button
+              onClick={() => { setPackMode(!packMode); setPackSelection(new Set()); }}
+              className="txt-meta font-bold uppercase hover:opacity-70 transition-opacity"
+            >
+              {packMode ? 'Done' : 'Select Items'}
+            </button>
+          </div>
+        </div>
+
+        {packMode && (
+          <div className="flex flex-wrap gap-2">
+            {items.filter((i) => (i as Item & { status?: string }).status === 'owned').map((item) => {
+              const selected = packSelection.has(item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    const next = new Set(packSelection);
+                    if (selected) next.delete(item.id);
+                    else next.add(item.id);
+                    setPackSelection(next);
+                  }}
+                  className="transition-all duration-100"
+                  style={{
+                    background: selected ? 'var(--color-text)' : 'transparent',
+                    color: selected ? '#fff' : 'var(--color-text)',
+                    border: '1px solid var(--color-text)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    padding: '4px 10px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {getDisplayName(item)}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
