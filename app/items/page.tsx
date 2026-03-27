@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getItems, getOutfitsForItem } from '@/lib/data';
+import { getItems, getOutfitsForItem, getDisplayName } from '@/lib/data';
 import ItemImage from '@/components/ItemImage';
 
 export default function ItemsPage() {
@@ -37,7 +37,7 @@ export default function ItemsPage() {
                       <ItemImage item={item} size="sm" />
                       <div className="flex flex-col gap-1">
                         <span className="text-lg font-bold leading-tight tracking-tight">
-                          {item.name}
+                          {getDisplayName(item)}
                         </span>
                         <span className="txt-meta uppercase opacity-70">
                           {outfitCount} outfit{outfitCount !== 1 ? 's' : ''}

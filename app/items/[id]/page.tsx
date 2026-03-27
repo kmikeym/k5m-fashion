@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getItem, getItems, getOutfitsForItem, getItemsForOutfit } from '@/lib/data';
+import { getItem, getItems, getOutfitsForItem, getItemsForOutfit, getDisplayName } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import OutfitCard from '@/components/OutfitCard';
 import ItemImage from '@/components/ItemImage';
@@ -39,7 +39,7 @@ export default async function ItemPage({ params }: { params: Promise<{ id: strin
 
         <div>
           <p className="txt-meta uppercase opacity-60 mb-2">{item.category}</p>
-          <h2 className="txt-display-solid">{item.name}</h2>
+          <h2 className="txt-display-solid">{getDisplayName(item)}</h2>
           <p className="txt-meta opacity-50 mt-2">
             Appears in {outfits.length} outfit{outfits.length !== 1 ? 's' : ''}
           </p>

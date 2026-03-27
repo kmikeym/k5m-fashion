@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getOutfit, getOutfits, getItemsForOutfit } from '@/lib/data';
+import { getOutfit, getOutfits, getItemsForOutfit, getDisplayName } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import OutfitCard from '@/components/OutfitCard';
 import ItemImage from '@/components/ItemImage';
@@ -65,7 +65,7 @@ export default async function OutfitPage({ params }: { params: Promise<{ id: str
                   <ItemImage item={item} size="sm" />
                   <div className="flex flex-col gap-1">
                     <span className="text-lg font-bold leading-tight tracking-tight">
-                      {item.name}
+                      {getDisplayName(item)}
                     </span>
                     <span className="txt-meta uppercase opacity-70">
                       {item.category}

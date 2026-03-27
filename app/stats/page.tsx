@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import outfitsData from '@/data/outfits.json';
 import itemsData from '@/data/items.json';
 import type { Outfit, Item } from '@/lib/types';
+import { getDisplayName } from '@/lib/data';
 
 interface ItemStat {
   id: string;
@@ -78,7 +79,8 @@ export default function StatsPage() {
             const rateA = stats[a]?.total > 0 ? stats[a].hot / stats[a].total : 0;
             const rateB = stats[b]?.total > 0 ? stats[b].hot / stats[b].total : 0;
             const synergy = Math.round((pairRate - (rateA + rateB) / 2) * 100);
-            const bName = items.find((x) => x.id === b)?.name || b;
+            const bItem = items.find((x) => x.id === b);
+            const bName = bItem ? getDisplayName(bItem) : b;
 
             if (best === null || synergy > best.synergy) best = { name: bName, synergy };
             if (worst === null || synergy < worst.synergy) worst = { name: bName, synergy };
@@ -89,7 +91,7 @@ export default function StatsPage() {
 
         const computed: ItemStat[] = items.map((item) => ({
           id: item.id,
-          name: item.name,
+          name: getDisplayName(item),
           category: item.category,
           appearances: stats[item.id]?.appearances || 0,
           hotRate: stats[item.id]?.total > 0 ? stats[item.id].hot / stats[item.id].total : null,

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser, SignInButton } from '@clerk/nextjs';
 import type { Outfit, Item } from '@/lib/types';
+import { getDisplayName } from '@/lib/data';
 
 interface OutfitCardProps {
   outfit: Outfit;
@@ -116,7 +117,7 @@ export default function OutfitCard({
               ) : (
                 items.map((item) => (
                   <span key={item.id} className="photo-tag">
-                    {item.name}
+                    {getDisplayName(item)}
                   </span>
                 ))
               )}

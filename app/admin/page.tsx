@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import type { Outfit, Item } from '@/lib/types';
+import { getDisplayName } from '@/lib/data';
 
 const CATEGORIES = ['tops', 'bottoms', 'shoes', 'outerwear', 'accessories', 'hats'] as const;
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'kmikeym@kmikeym.com';
@@ -379,7 +380,7 @@ export default function AdminPage() {
                       const item = items.find((i) => i.id === itemId);
                       return (
                         <span key={itemId} className="photo-tag">
-                          {item?.name || itemId}
+                          {item ? getDisplayName(item) : itemId}
                         </span>
                       );
                     })
@@ -426,7 +427,7 @@ export default function AdminPage() {
                                 opacity: saving ? 0.5 : 1,
                               }}
                             >
-                              {item.name}
+                              {getDisplayName(item)}
                             </button>
                           );
                         })}

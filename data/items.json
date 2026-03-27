@@ -1,92 +1,162 @@
 [
   {
     "id": "black-slim-jeans",
+    "type": "Jeans",
+    "color": "Black",
+    "modifier": "Slim",
     "name": "Black Slim Jeans",
     "category": "bottoms",
+    "status": "owned",
+    "tags": [],
     "image": "/items/black-slim-jeans.jpg"
   },
   {
     "id": "white-tee",
+    "type": "Tee",
+    "color": "White",
+    "modifier": "Crew",
     "name": "White Crew Tee",
     "category": "tops",
+    "status": "owned",
+    "tags": [],
     "image": "/items/white-tee.jpg"
   },
   {
     "id": "dodgers-hat",
+    "type": "Cap",
+    "modifier": "LA Dodgers",
     "name": "LA Dodgers Cap",
     "category": "hats",
+    "status": "owned",
+    "tags": [],
     "image": "/items/dodgers-hat.jpg"
   },
   {
     "id": "grey-hoodie",
+    "type": "Hoodie",
+    "color": "Grey",
+    "modifier": "Zip",
     "name": "Grey Zip Hoodie",
     "category": "outerwear",
+    "status": "owned",
+    "tags": [],
     "image": "/items/grey-hoodie.jpg"
   },
   {
     "id": "white-sneakers",
+    "type": "Sneakers",
+    "color": "White",
     "name": "White Sneakers",
     "category": "shoes",
+    "status": "owned",
+    "tags": [],
     "image": "/items/white-sneakers.jpg"
   },
   {
     "id": "blue-crane-tee",
+    "type": "Tee",
+    "color": "Blue",
+    "modifier": "Crane",
     "name": "Blue Crane Tee",
     "category": "tops",
+    "status": "owned",
+    "tags": [],
     "image": "/items/blue-crane-tee.jpg"
   },
   {
     "id": "carharrt-tan-la-dodgers-hat",
-    "name": "Carharrt Tan LA Dodgers Hat",
+    "type": "Hat",
+    "color": "Tan",
+    "modifier": "LA Dodgers",
+    "brand": "Carhartt",
+    "name": "Tan LA Dodgers Hat",
     "category": "hats",
+    "status": "owned",
+    "tags": [],
     "image": "/items/carharrt-tan-la-dodgers-hat.jpg"
   },
   {
     "id": "black-distressed-carharrt-work-pants",
-    "name": "Black Distressed Carharrt Work Pants",
+    "type": "Work Pants",
+    "color": "Black",
+    "modifier": "Distressed",
+    "brand": "Carhartt",
+    "name": "Black Distressed Work Pants",
     "category": "bottoms",
+    "status": "owned",
+    "tags": [],
     "image": "/items/black-distressed-carharrt-work-pants.jpg"
   },
   {
     "id": "black-tom-ford-eyeglasses",
-    "name": "Black Tom Ford Eyeglasses",
+    "type": "Eyeglasses",
+    "color": "Black",
+    "brand": "Tom Ford",
+    "name": "Black Eyeglasses",
     "category": "accessories",
+    "status": "owned",
+    "tags": [],
     "image": "/items/black-tom-ford-eyeglasses.jpg"
   },
   {
     "id": "nasa-space-suit",
+    "type": "Space Suit",
+    "modifier": "NASA",
     "name": "NASA Space Suit",
     "category": "outerwear",
+    "status": "retired",
+    "tags": [],
     "image": "/items/nasa-space-suit.jpg"
   },
   {
     "id": "blue-work-systems-tee",
-    "name": "Blue \"Work Systems\" Tee",
+    "type": "Tee",
+    "color": "Blue",
+    "modifier": "Work Systems",
+    "name": "Blue Work Systems Tee",
     "category": "tops",
+    "status": "owned",
+    "tags": [],
     "image": "/items/blue-work-systems-tee.jpg"
   },
   {
     "id": "roka-falcon-aviator-prescription-sunglasses",
-    "name": "Roka Falcon Aviator Prescription Sunglasses",
+    "type": "Sunglasses",
+    "modifier": "Falcon Aviator Prescription",
+    "brand": "Roka",
+    "name": "Falcon Aviator Prescription Sunglasses",
     "category": "accessories",
+    "status": "owned",
+    "tags": [],
     "image": "/items/roka-falcon-aviator-prescription-sunglasses.jpg"
   },
   {
     "id": "tuxedo",
+    "type": "Tuxedo",
     "name": "Tuxedo",
     "category": "outerwear",
+    "status": "retired",
+    "tags": [],
     "image": "/items/tuxedo.jpg"
   },
   {
     "id": "black-tee",
+    "type": "Tee",
+    "color": "Black",
     "name": "Black Tee",
     "category": "tops",
+    "status": "owned",
+    "tags": [],
     "image": "/items/black-tee.jpg"
   },
   {
     "id": "black-flight-jacket",
+    "type": "Flight Jacket",
+    "color": "Black",
     "name": "Black Flight Jacket",
     "category": "outerwear",
+    "status": "owned",
+    "tags": [],
     "image": "/items/black-flight-jacket.jpg"
   }
 ]

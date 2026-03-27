@@ -2,6 +2,12 @@ import outfitsData from '@/data/outfits.json';
 import itemsData from '@/data/items.json';
 import type { Outfit, Item } from './types';
 
+export function getDisplayName(item: Item): string {
+  const parts = [item.color, item.modifier, item.type].filter(Boolean);
+  if (parts.length > 0) return parts.join(' ');
+  return item.name || item.id;
+}
+
 export function getOutfits(): Outfit[] {
   return (outfitsData as Outfit[]).sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()

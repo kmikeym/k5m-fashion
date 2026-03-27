@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Item } from '@/lib/types';
+import { getDisplayName } from '@/lib/data';
 
 interface ItemImageProps {
   item: Item;
@@ -25,7 +26,8 @@ export default function ItemImage({ item, size }: ItemImageProps) {
 
   if (imgError) {
     const dims = sizeStyles[size];
-    const initial = item.name.charAt(0).toUpperCase();
+    const displayName = getDisplayName(item);
+    const initial = displayName.charAt(0).toUpperCase();
 
     return (
       <div
@@ -59,7 +61,7 @@ export default function ItemImage({ item, size }: ItemImageProps) {
   return (
     <img
       src={item.image}
-      alt={item.name}
+      alt={getDisplayName(item)}
       className="flex-shrink-0 object-cover"
       style={{
         ...dims,

@@ -1,8 +1,25 @@
 export interface Item {
   id: string;
-  name: string;
+
+  // Display name = auto-generated from [color] [modifier] [type]
+  type: string;
+  color?: string;
+  modifier?: string;
+
+  // Hidden metadata
+  brand?: string;
+  size?: string;
+  notes?: string;
+
+  // Classification
   category: 'tops' | 'bottoms' | 'shoes' | 'outerwear' | 'accessories' | 'hats';
+  status: 'owned' | 'packed' | 'wishlist' | 'retired';
+  tags?: string[];
+
   image?: string;
+
+  // Legacy — kept for backward compat, auto-generated from structured fields
+  name?: string;
 }
 
 export interface Outfit {
