@@ -5,4 +5,4 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "k5m-fashion-votes"
-database_id = "" # Fill after creating D1 database in Cloudflare dashboard
+database_id = "a61d4250-9551-467c-8c2d-0860092c68c9"

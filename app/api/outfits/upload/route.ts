@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getD1 } from '@/lib/db';
 
 export const runtime = 'edge';
 
@@ -11,32 +12,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No photo provided' }, { status: 400 });
     }
 
-    // Dynamic require — only works in Node.js (local dev)
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-
-      const now = new Date();
-      const dateStr = now.toISOString().split('T')[0];
-      const timestamp = now.getTime();
-      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-      const filename = `${dateStr}-${timestamp}.${ext}`;
-      const id = `${dateStr}-${timestamp}`;
-
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      fs.writeFileSync(path.join(process.cwd(), 'public', 'outfits', filename), buffer);
-
-      const outfitsPath = path.join(process.cwd(), 'data', 'outfits.json');
-      const outfits = JSON.parse(fs.readFileSync(outfitsPath, 'utf-8'));
-      const newOutfit = { id, date: dateStr, image: `/outfits/${filename}`, description: '', items: [], location: '' };
-      outfits.unshift(newOutfit);
-      fs.writeFileSync(outfitsPath, JSON.stringify(outfits, null, 2) + '\n');
-
-      return NextResponse.json(newOutfit, { status: 201 });
-    } catch {
-      return NextResponse.json({ error: 'Upload requires local dev mode' }, { status: 501 });
+    const db = await getD1();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 });
     }
+
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0];
+    const timestamp = now.getTime();
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const filename = `${dateStr}-${timestamp}.${ext}`;
+    const id = `${dateStr}-${timestamp}`;
+
+    // Save metadata to D1
+    await db.prepare(
+      'INSERT INTO outfits (id, date, image, description, location) VALUES (?, ?, ?, ?, ?)'
+    ).bind(id, dateStr, `/outfits/${filename}`, '', '').run();
+
+    // Note: image file must be committed to repo separately for now
+    // TODO: R2 integration for production image uploads
+    return NextResponse.json({
+      id,
+      date: dateStr,
+      image: `/outfits/${filename}`,
+      description: '',
+      items: [],
+      location: '',
+    }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

@@ -25,10 +25,10 @@ export default function OutfitCard({
   useEffect(() => {
     fetch(`/api/votes?outfit_id=${outfit.id}`)
       .then((r) => r.json())
+      .then((data) => data as { hot?: number; not?: number; myVote?: 'hot' | 'not' })
       .then((data) => {
         setHotCount(data.hot || 0);
         setNotCount(data.not || 0);
-        // Server tells us if we already voted
         if (data.myVote) setVoted(data.myVote);
       })
       .catch(() => {});

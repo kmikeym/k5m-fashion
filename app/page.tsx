@@ -24,14 +24,15 @@ export default function Home() {
     // Fetch all tallies
     fetch('/api/votes')
       .then((r) => r.json())
-      .then((data) => setTallies(data))
+      .then((data) => setTallies(data as Record<string, { hot: number; not: number }>))
       .catch(() => {});
 
     // Fetch user's votes if signed in
     if (isSignedIn) {
       fetch('/api/votes?mine=true')
         .then((r) => r.json())
-        .then((records: { outfit_id: string; vote: 'hot' | 'not' }[]) => {
+        .then((data) => data as { outfit_id: string; vote: 'hot' | 'not' }[])
+        .then((records) => {
           const voted = new Set<string>();
           const voteMap: Record<string, 'hot' | 'not'> = {};
           for (const r of records) {

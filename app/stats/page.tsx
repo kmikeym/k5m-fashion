@@ -27,7 +27,8 @@ export default function StatsPage() {
   useEffect(() => {
     fetch('/api/votes')
       .then((r) => r.json())
-      .then((allVotes: Record<string, { hot: number; not: number }>) => {
+      .then((data) => data as Record<string, { hot: number; not: number }>)
+      .then((allVotes) => {
         const stats: Record<string, { hot: number; total: number; appearances: number }> = {};
         for (const item of items) {
           stats[item.id] = { hot: 0, total: 0, appearances: 0 };

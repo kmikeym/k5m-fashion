@@ -1,0 +1,56 @@
+-- Seed data from JSON files
+
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('black-slim-jeans', 'Black Slim Jeans', 'bottoms', '/items/black-slim-jeans.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('white-tee', 'White Crew Tee', 'tops', '/items/white-tee.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('dodgers-hat', 'LA Dodgers Cap', 'hats', '/items/dodgers-hat.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('grey-hoodie', 'Grey Zip Hoodie', 'outerwear', '/items/grey-hoodie.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('white-sneakers', 'White Sneakers', 'shoes', '/items/white-sneakers.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('blue-crane-tee', 'Blue Crane Tee', 'tops', '/items/blue-crane-tee.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('carharrt-tan-la-dodgers-hat', 'Carharrt Tan LA Dodgers Hat', 'hats', '/items/carharrt-tan-la-dodgers-hat.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('black-distressed-carharrt-work-pants', 'Black Distressed Carharrt Work Pants', 'bottoms', '/items/black-distressed-carharrt-work-pants.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('black-tom-ford-eyeglasses', 'Black Tom Ford Eyeglasses', 'accessories', '/items/black-tom-ford-eyeglasses.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('nasa-space-suit', 'NASA Space Suit', 'outerwear', '/items/nasa-space-suit.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('blue-work-systems-tee', 'Blue "Work Systems" Tee', 'tops', '/items/blue-work-systems-tee.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('roka-falcon-aviator-prescription-sunglasses', 'Roka Falcon Aviator Prescription Sunglasses', 'accessories', '/items/roka-falcon-aviator-prescription-sunglasses.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('tuxedo', 'Tuxedo', 'outerwear', '/items/tuxedo.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('black-tee', 'Black Tee', 'tops', '/items/black-tee.jpg');
+INSERT OR IGNORE INTO items (id, name, category, image) VALUES ('black-flight-jacket', 'Black Flight Jacket', 'outerwear', '/items/black-flight-jacket.jpg');
+
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('pxl-20250901', '2025-09-01', '/outfits/PXL_20250901_031742508.jpg', 'Mike at Mike''s', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-9638', '2025-08-01', '/outfits/IMG_9638.jpeg', 'Dogs Walk', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-9262', '2025-07-01', '/outfits/IMG_9262.JPG', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-7958', '2025-06-01', '/outfits/IMG_7958.JPG', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-7751', '2025-05-01', '/outfits/IMG_7751.jpeg', 'To Infinity', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-3759', '2025-04-01', '/outfits/IMG_3759.jpeg', 'Buff Boys on Bikes', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-2774', '2025-03-01', '/outfits/IMG_2774.jpeg', 'Airport Wait', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-1530', '2025-02-01', '/outfits/IMG_1530.jpeg', 'Aspirational', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-1447', '2025-01-01', '/outfits/IMG_1447.jpeg', 'Young Mike', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-0950', '2024-12-01', '/outfits/IMG_0950.jpeg', 'Dress For the Job You Want', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-0784', '2024-11-01', '/outfits/IMG_0784.jpeg', 'Go Badgers!', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('img-0477', '2024-10-01', '/outfits/IMG_0477.jpeg', 'Dramatic Lighting', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('leben-mike', '2023-01-01', '/outfits/23_Leben_Mike_01.jpg', 'Regular Guy', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('61bd5401', '2022-01-01', '/outfits/61BD5401-8D73-4E5F-A5FE-30600A354ECA.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('2019-04-03', '2019-04-03', '/outfits/2019-04-03.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('2019-02-08', '2019-02-08', '/outfits/2019-02-08.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('sf-118', '2018-01-01', '/outfits/sf-118.jpg', '', 'San Francisco');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('2017-04-21', '2017-04-21', '/outfits/2017-04-21.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('mg-4509', '2015-01-01', '/outfits/_MG_4509.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('2007-09-03', '2007-09-03', '/outfits/2007-09-03.jpg', '', '');
+INSERT OR IGNORE INTO outfits (id, date, image, description, location) VALUES ('armypic', '1997-01-01', '/outfits/armypic.jpg', '', '');
+
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('pxl-20250901', 'blue-crane-tee');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('pxl-20250901', 'carharrt-tan-la-dodgers-hat');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('pxl-20250901', 'black-distressed-carharrt-work-pants');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('pxl-20250901', 'black-tom-ford-eyeglasses');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-9638', 'dodgers-hat');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-7751', 'nasa-space-suit');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-2774', 'dodgers-hat');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-2774', 'roka-falcon-aviator-prescription-sunglasses');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-2774', 'blue-work-systems-tee');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-0950', 'tuxedo');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('img-0477', 'black-tom-ford-eyeglasses');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('leben-mike', 'black-flight-jacket');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('leben-mike', 'black-tom-ford-eyeglasses');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('61bd5401', 'dodgers-hat');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('61bd5401', 'black-tee');
+INSERT OR IGNORE INTO outfit_items (outfit_id, item_id) VALUES ('61bd5401', 'black-flight-jacket');

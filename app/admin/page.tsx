@@ -58,7 +58,7 @@ export default function AdminPage() {
       fetch('/api/items').then((r) => r.json()),
       fetch('/api/outfits/list').then((r) => r.json()),
     ]).then(([itemsData, outfitsData]) => {
-      setItems(itemsData);
+      setItems(itemsData as Item[]);
       setOutfits(
         (outfitsData as Outfit[]).sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -95,7 +95,7 @@ export default function AdminPage() {
 
   async function refreshItems() {
     const data = await fetch('/api/items').then((r) => r.json());
-    setItems(data);
+    setItems(data as Item[]);
   }
 
   async function addNewItem() {

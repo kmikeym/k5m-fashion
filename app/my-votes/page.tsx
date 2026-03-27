@@ -28,7 +28,7 @@ export default function MyVotesPage() {
     fetch('/api/votes?mine=true')
       .then((r) => r.json())
       .then((data) => {
-        setMyVotes(data);
+        setMyVotes(data as VoteRecord[]);
         setLoading(false);
       })
       .catch(() => setLoading(false));

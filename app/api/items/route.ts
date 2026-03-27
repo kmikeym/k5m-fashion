@@ -1,42 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
-import itemsData from '@/data/items.json';
+import { getD1 } from '@/lib/db';
 
 export const runtime = 'edge';
 
-// GET all items — works everywhere (reads from bundled JSON)
 export async function GET() {
-  return NextResponse.json(itemsData);
+  const db = await getD1();
+  if (!db) {
+    // Fallback to bundled JSON
+    const itemsData = await import('@/data/items.json');
+    return NextResponse.json(itemsData.default);
+  }
+
+  const { results } = await db.prepare(
+    'SELECT id, name, category, image FROM items ORDER BY name'
+  ).all();
+  return NextResponse.json(results);
 }
 
-// POST new item — local dev only (needs filesystem)
 export async function POST(request: NextRequest) {
   try {
-    const { name, category } = await request.json();
-
+    const body = await request.json() as { name?: string; category?: string };
+    const { name, category } = body;
     if (!name || !category) {
       return NextResponse.json({ error: 'name and category required' }, { status: 400 });
     }
 
-    // Dynamic require — only works in Node.js (local dev)
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-      const filePath = path.join(process.cwd(), 'data', 'items.json');
-      const items = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-      const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      if (items.find((i: { id: string }) => i.id === id)) {
-        return NextResponse.json({ error: 'Item already exists', id }, { status: 409 });
-      }
-
-      const newItem = { id, name, category, image: `/items/${id}.jpg` };
-      items.push(newItem);
-      fs.writeFileSync(filePath, JSON.stringify(items, null, 2) + '\n');
-
-      return NextResponse.json(newItem, { status: 201 });
-    } catch {
-      return NextResponse.json({ error: 'Admin features require local dev mode' }, { status: 501 });
+    const db = await getD1();
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 });
     }
+
+    // Check for duplicate
+    const existing = await db.prepare('SELECT id FROM items WHERE id = ?').bind(id).first();
+    if (existing) {
+      return NextResponse.json({ error: 'Item already exists', id }, { status: 409 });
+    }
+
+    const image = `/items/${id}.jpg`;
+    await db.prepare(
+      'INSERT INTO items (id, name, category, image) VALUES (?, ?, ?, ?)'
+    ).bind(id, name, category, image).run();
+
+    return NextResponse.json({ id, name, category, image }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
