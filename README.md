@@ -95,6 +95,12 @@ npm run dev
 
 ## History
 
-This repo started in November 2012 as "Fully Fashioned" — a fashion project by Curt Merrill and Mike Merrill. The original idea: dress with purpose. The original code: a Django requirements file and an empty README. After 14 years of dormancy, it's back — same name, same collaborators, entirely new technology.
+In October 2012, KmikeyM shareholders voted to approve a project called Fully Fashioned:
+
+> The objective of Fully Fashioned is to create an online tool for collecting quantified advice to guide the development of personal style. The program will develop a collective fashion intelligence by using crowd-sourcing to rate what is worn each day. Purchasing decisions can then be based on the fundamental elements (e.g. brands, colors, patterns) best suited for the individual.
+
+The repo was created the next month. It contained a Django requirements file, a `.gitignore`, and a README that said "Dress with purpose." Then nothing happened for 14 years.
+
+In March 2026, the project came back — same name, same collaborators, entirely new technology. The spec didn't need updating. The shareholders had already written it.
 
 Made by Curt Merrill and Mike Merrill.
