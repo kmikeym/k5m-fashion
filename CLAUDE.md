@@ -98,5 +98,11 @@ Push to `master`. Cloudflare Pages auto-deploys.
 - [x] Structured item fields (type/color/modifier/brand/status/tags)
 - [x] Three-section wardrobe page (Closet/Wardrobe/Wishlist)
 - [x] Admin: structured editor, lightbox, bulk pack
-- [ ] Run migration 003 on production D1 (before next deploy)
+- [x] Run migration 003 on production D1 (done 2026-03-27)
+- [ ] **Admin item edit UI** — inline editor to edit existing items (plan: `docs/plans/2026-03-27-admin-item-edit.md`)
 - [ ] Shareholder authentication for weighted votes (deferred)
+
+## Plans
+- `docs/plans/2026-03-27-wardrobe-expansion-design.md` — Design doc for the wardrobe expansion (completed)
+- `docs/plans/2026-03-27-wardrobe-expansion-plan.md` — Implementation plan for the wardrobe expansion (completed)
+- `docs/plans/2026-03-27-admin-item-edit.md` — **NEXT UP:** Add inline item editor to admin page
