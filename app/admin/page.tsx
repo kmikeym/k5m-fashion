@@ -48,6 +48,8 @@ export default function AdminPage() {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [packMode, setPackMode] = useState(false);
   const [packSelection, setPackSelection] = useState<Set<string>>(new Set());
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [editItem, setEditItem] = useState<Partial<Item>>({});
 
   async function refreshOutfits() {
     // Fetch fresh from the JSON file via a cache-busting import
@@ -159,6 +161,41 @@ export default function AdminPage() {
     setEditingField(key);
     setEditValue(currentValue);
   }
+
+  function startEditItem(item: Item) {
+    setEditingItemId(item.id);
+    setEditItem({
+      type: item.type,
+      color: item.color || '',
+      modifier: item.modifier || '',
+      brand: item.brand || '',
+      size: item.size || '',
+      category: item.category,
+      status: item.status,
+      tags: item.tags || [],
+      notes: item.notes || '',
+    });
+  }
+
+  async function saveEditItem() {
+    if (!editingItemId) return;
+    setSaving(true);
+    const res = await fetch('/api/items', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: editingItemId, ...editItem }),
+    });
+    if (res.ok) {
+      await refreshItems();
+    }
+    setEditingItemId(null);
+    setEditItem({});
+    setSaving(false);
+  }
+
+  const editItemPreview = editingItemId
+    ? [editItem.color, editItem.modifier, editItem.type].filter(Boolean).join(' ') || 'Item Name Preview'
+    : '';
 
   async function toggleItem(outfitId: string, itemId: string) {
     const outfit = outfits.find((o) => o.id === outfitId);
@@ -453,6 +490,202 @@ export default function AdminPage() {
             })}
           </div>
         )}
+      </div>
+
+      {/* Items List — click to edit */}
+      <div className="mb-10" style={{ borderBottom: '1px solid var(--color-text)', paddingBottom: '24px' }}>
+        <p className="txt-meta font-semibold uppercase mb-3">
+          All Items
+        </p>
+
+        <div className="flex flex-col">
+          {items.map((item) => {
+            const isEditingThis = editingItemId === item.id;
+            return (
+              <div key={item.id} style={{ borderBottom: '1px solid var(--color-line)' }}>
+                {/* Item row — click to expand */}
+                <div
+                  className="flex items-center gap-3 py-2 cursor-pointer hover:opacity-70 transition-opacity"
+                  onClick={() => isEditingThis ? setEditingItemId(null) : startEditItem(item)}
+                >
+                  {/* Display name */}
+                  <span className="text-sm font-bold flex-1 truncate">
+                    {getDisplayName(item)}
+                  </span>
+
+                  {/* Category badge */}
+                  <span className="status-badge opacity-60">
+                    {item.category}
+                  </span>
+
+                  {/* Status badge */}
+                  <span
+                    className="status-badge"
+                    style={{
+                      background: item.status === 'packed' ? 'var(--color-text)' : 'transparent',
+                      color: item.status === 'packed' ? '#fff' : 'var(--color-text)',
+                    }}
+                  >
+                    {item.status}
+                  </span>
+
+                  {/* Brand (muted) */}
+                  {item.brand && (
+                    <span className="txt-meta opacity-40 hidden sm:inline">
+                      {item.brand}
+                    </span>
+                  )}
+
+                  {/* Toggle arrow */}
+                  <span className="txt-meta opacity-30">
+                    {isEditingThis ? '▲' : '▼'}
+                  </span>
+                </div>
+
+                {/* Inline editor (expanded) */}
+                {isEditingThis && (
+                  <div className="pb-4 pt-2 pl-4">
+                    {/* Live name preview */}
+                    <div className="text-lg font-bold tracking-tight mb-3" style={{ opacity: editItem.type ? 1 : 0.3 }}>
+                      {editItemPreview}
+                      {editItem.brand && <span className="txt-meta opacity-40 ml-2">{editItem.brand}</span>}
+                    </div>
+
+                    {/* Row 1: Type + Color + Modifier */}
+                    <div className="flex gap-2 mb-2">
+                      <div className="flex-1">
+                        <label className="txt-meta opacity-50 block mb-1">Type *</label>
+                        <input
+                          type="text"
+                          value={editItem.type || ''}
+                          onChange={(e) => setEditItem({ ...editItem, type: e.target.value })}
+                          placeholder="Jeans, Hat, Tee..."
+                          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="txt-meta opacity-50 block mb-1">Color</label>
+                        <input
+                          type="text"
+                          value={editItem.color || ''}
+                          onChange={(e) => setEditItem({ ...editItem, color: e.target.value })}
+                          placeholder="Black, Blue..."
+                          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="txt-meta opacity-50 block mb-1">Modifier</label>
+                        <input
+                          type="text"
+                          value={editItem.modifier || ''}
+                          onChange={(e) => setEditItem({ ...editItem, modifier: e.target.value })}
+                          placeholder="Slim, LA Dodgers..."
+                          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Row 2: Brand + Size + Category + Status */}
+                    <div className="flex gap-2 items-end mb-2">
+                      <div>
+                        <label className="txt-meta opacity-50 block mb-1">Brand</label>
+                        <input
+                          type="text"
+                          value={editItem.brand || ''}
+                          onChange={(e) => setEditItem({ ...editItem, brand: e.target.value })}
+                          placeholder="Carhartt..."
+                          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                          style={{ width: 120 }}
+                        />
+                      </div>
+                      <div>
+                        <label className="txt-meta opacity-50 block mb-1">Size</label>
+                        <input
+                          type="text"
+                          value={editItem.size || ''}
+                          onChange={(e) => setEditItem({ ...editItem, size: e.target.value })}
+                          placeholder="M, 32..."
+                          className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                          style={{ width: 80 }}
+                        />
+                      </div>
+                      <div>
+                        <label className="txt-meta opacity-50 block mb-1">Category</label>
+                        <select
+                          value={editItem.category || 'tops'}
+                          onChange={(e) => setEditItem({ ...editItem, category: e.target.value as Item['category'] })}
+                          className="border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                        >
+                          {CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="txt-meta opacity-50 block mb-1">Status</label>
+                        <select
+                          value={editItem.status || 'owned'}
+                          onChange={(e) => setEditItem({ ...editItem, status: e.target.value as Item['status'] })}
+                          className="border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                        >
+                          <option value="owned">owned</option>
+                          <option value="packed">packed</option>
+                          <option value="wishlist">wishlist</option>
+                          <option value="retired">retired</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Row 3: Tags */}
+                    <div className="mb-2">
+                      <label className="txt-meta opacity-50 block mb-1">Tags (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={(editItem.tags || []).join(', ')}
+                        onChange={(e) => setEditItem({
+                          ...editItem,
+                          tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
+                        })}
+                        placeholder="capsule, formal, travel..."
+                        className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink"
+                      />
+                    </div>
+
+                    {/* Row 4: Notes */}
+                    <div className="mb-3">
+                      <label className="txt-meta opacity-50 block mb-1">Notes</label>
+                      <textarea
+                        value={editItem.notes || ''}
+                        onChange={(e) => setEditItem({ ...editItem, notes: e.target.value })}
+                        placeholder="Any notes about this item..."
+                        rows={2}
+                        className="w-full border border-ink/20 bg-transparent px-3 py-2 text-sm outline-none focus:border-ink resize-y"
+                      />
+                    </div>
+
+                    {/* Save / Cancel */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={saveEditItem}
+                        disabled={saving || !editItem.type?.trim()}
+                        className="photo-tag cursor-pointer hover:opacity-70 transition-opacity py-2 px-4"
+                        style={{ fontSize: '12px', opacity: saving ? 0.5 : 1 }}
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={() => { setEditingItemId(null); setEditItem({}); }}
+                        className="txt-meta font-bold uppercase opacity-50 hover:opacity-100 transition-opacity cursor-pointer py-2 px-4"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Outfit List */}
