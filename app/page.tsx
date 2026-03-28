@@ -4,17 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import OutfitCard from '@/components/OutfitCard';
-import outfitsData from '@/data/outfits.json';
 import itemsData from '@/data/items.json';
 import type { Outfit, Item } from '@/lib/types';
 
 export default function Home() {
   const { isSignedIn } = useUser();
-  const allOutfits = (outfitsData as Outfit[]).sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
   const allItems = itemsData as Item[];
 
+  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
+  const [archiveOutfits, setArchiveOutfits] = useState<Outfit[]>([]);
   const [queue, setQueue] = useState<Outfit[]>([]);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
   const [myVotes, setMyVotes] = useState<Record<string, 'hot' | 'not'>>({});
@@ -23,6 +21,28 @@ export default function Home() {
 
   const refresh = useCallback(() => {
     setFetchError(false);
+
+    // Fetch outfits from D1 (exclude own if signed in)
+    const outfitUrl = isSignedIn ? '/api/outfits?exclude_own=true' : '/api/outfits';
+    fetch(outfitUrl)
+      .then((r) => r.json())
+      .then((data) => {
+        const outfits = (data as Outfit[]).sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setAllOutfits(outfits);
+      })
+      .catch(() => setFetchError(true));
+
+    // Fetch ALL outfits for archive grid (including own)
+    fetch('/api/outfits')
+      .then((r) => r.json())
+      .then((data) => {
+        setArchiveOutfits((data as Outfit[]).sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        ));
+      })
+      .catch(() => {});
 
     // Fetch all tallies
     fetch('/api/votes')
@@ -44,16 +64,22 @@ export default function Home() {
           }
           setVotedIds(voted);
           setMyVotes(voteMap);
-          setQueue(allOutfits.filter((o) => !voted.has(o.id)));
         })
         .catch(() => setFetchError(true));
     } else {
-      // Not signed in — no voted state
       setVotedIds(new Set());
       setMyVotes({});
-      setQueue(allOutfits);
     }
   }, [isSignedIn]);
+
+  // Sync queue when outfits or votes change
+  useEffect(() => {
+    if (isSignedIn) {
+      setQueue(allOutfits.filter((o) => !votedIds.has(o.id)));
+    } else {
+      setQueue(allOutfits);
+    }
+  }, [allOutfits, votedIds, isSignedIn]);
 
   useEffect(() => {
     refresh();
@@ -73,7 +99,7 @@ export default function Home() {
       .filter(Boolean) as Item[];
   }
 
-  const totalOutfits = allOutfits.length;
+  const totalOutfits = archiveOutfits.length;
   const totalRated = votedIds.size;
 
   return (
@@ -89,7 +115,7 @@ export default function Home() {
         </div>
         {isSignedIn && (
           <p className="txt-meta opacity-60">
-            {totalRated} of {totalOutfits} rated
+            {totalRated} of {totalOutfits} voted
             {queue.length > 0 && <> &middot; {queue.length} remaining</>}
           </p>
         )}
@@ -156,7 +182,7 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">
-              {allOutfits.map((outfit) => {
+              {archiveOutfits.map((outfit) => {
                 const vote = myVotes[outfit.id];
                 const tally = tallies[outfit.id];
                 const total = tally ? tally.hot + tally.not : 0;

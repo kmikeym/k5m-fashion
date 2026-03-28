@@ -1,7 +1,7 @@
 # K5M Fashion — Fully Fashioned
 
 ## What This Is
-A 'fit pic voting app. Mike posts daily outfits, people vote Hot or Not, and the data reveals which wardrobe items work and which don't.
+A multi-user 'fit pic voting app. Anyone signed in can post daily outfits, others vote +/− on them, and the data reveals which wardrobe items work and which don't.
 
 ## Stack
 - **Next.js 15** + TypeScript + Tailwind CSS 3
@@ -40,10 +40,29 @@ interface Item {
 - `retired` — no longer active
 
 ### Outfits (`data/outfits.json` + D1)
-- `id`, `date`, `image`, `description`, `items[]` (item IDs), `location`
+- `id`, `date`, `image`, `description`, `items[]` (item IDs), `location`, `user_id` (Clerk user ID of poster)
+- Existing outfits backfilled with admin user ID via migration 004
 
 ### Votes (D1 only)
 - `outfit_id`, `user_id`, `vote` ('hot'|'not')
+
+## Multi-User Features
+- **Any signed-in user can post fits** via `/post` page
+- **Feed excludes own fits** — you vote on everyone else's, not your own
+- **+/− voting** with percentage score display (no "hot"/"not" language)
+- **Profile page** (`/profile`) shows your own fits with scores
+- **Role-based nav:** signed-out sees Feed only; users see Feed/Post/My Fits/My Votes; admin also sees Items/Stats/Admin
+
+## Pages
+- `/` — Feed: vote on others' fits, archive grid of all fits
+- `/post` — Upload a new fit (any signed-in user)
+- `/profile` — Your posted fits with percentage scores
+- `/my-votes` — Your vote history
+- `/items` — Wardrobe browser (admin-only in nav)
+- `/items/[id]` — Individual item detail
+- `/outfits/[id]` — Individual outfit detail
+- `/stats` — Analytics (admin-only in nav)
+- `/admin` — Admin panel (admin-only)
 
 ## Wardrobe Page (`/items`)
 Three sections:
@@ -59,6 +78,8 @@ Three sections:
 - **Outfit management:** Upload photos, edit metadata, tag items
 
 ## API Routes
+- `GET /api/outfits` — returns all outfits from D1; `?exclude_own=true` excludes current user's; `?user_id=X` filters to one user
+- `POST /api/outfits/upload` — upload a new fit (requires auth, saves `user_id`)
 - `POST /api/vote` — `{ outfit_id, vote: 1|0 }`
 - `GET /api/votes?outfit_id=X` — returns `{ hot, not }`
 - `GET /api/votes` — returns all tallies
@@ -71,7 +92,10 @@ Three sections:
 npx wrangler d1 execute k5m-fashion-db --remote --file=migrations/001_init.sql
 npx wrangler d1 execute k5m-fashion-db --remote --file=migrations/002_seed.sql
 npx wrangler d1 execute k5m-fashion-db --remote --file=migrations/003_item_structured_fields.sql
+npx wrangler d1 execute k5m-fashion-db --remote --file=migrations/004_multi_user.sql
 ```
+
+**Note:** Before running migration 004, replace `ADMIN_CLERK_USER_ID` with the actual admin Clerk user ID.
 
 ## Build
 ```bash
@@ -99,10 +123,14 @@ Push to `master`. Cloudflare Pages auto-deploys.
 - [x] Three-section wardrobe page (Closet/Wardrobe/Wishlist)
 - [x] Admin: structured editor, lightbox, bulk pack
 - [x] Run migration 003 on production D1 (done 2026-03-27)
-- [ ] **Admin item edit UI** — inline editor to edit existing items (plan: `docs/plans/2026-03-27-admin-item-edit.md`)
+- [x] **Admin item edit UI** — inline editor to edit existing items (plan: `docs/plans/2026-03-27-admin-item-edit.md`)
+- [x] **Multi-user expansion** — +/− voting, /post page, /profile page, role-based nav, D1 API (plan: `docs/plans/2026-03-27-multi-user-plan.md`)
+- [ ] Run migration 004 on production D1 (replace ADMIN_CLERK_USER_ID first)
 - [ ] Shareholder authentication for weighted votes (deferred)
 
 ## Plans
 - `docs/plans/2026-03-27-wardrobe-expansion-design.md` — Design doc for the wardrobe expansion (completed)
 - `docs/plans/2026-03-27-wardrobe-expansion-plan.md` — Implementation plan for the wardrobe expansion (completed)
-- `docs/plans/2026-03-27-admin-item-edit.md` — **NEXT UP:** Add inline item editor to admin page
+- `docs/plans/2026-03-27-admin-item-edit.md` — Admin inline item editor (completed)
+- `docs/plans/2026-03-27-multi-user-design.md` — Design doc for multi-user expansion
+- `docs/plans/2026-03-27-multi-user-plan.md` — Implementation plan for multi-user expansion (completed)

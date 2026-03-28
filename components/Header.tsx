@@ -16,7 +16,7 @@ function CircularStamp() {
       />
       <text>
         <textPath href="#circlePath" startOffset="0%">
-          Fully Fashioned &bull; Cast Vote &bull;
+          Fully Fashioned &bull; The Daily Fit Check &bull;
         </textPath>
       </text>
     </svg>
@@ -34,27 +34,35 @@ export default function Header() {
     >
       <div className="flex flex-col">
         <Link href="/" className="txt-meta hover:opacity-70 transition-opacity">
-          Mike&apos;s Wardrobe
+          Fully Fashioned
         </Link>
         <nav className="flex gap-4 mt-1 items-center">
           <Link href="/" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
-            Fits
-          </Link>
-          <Link href="/items" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
-            Wardrobe
-          </Link>
-          <Link href="/stats" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
-            Stats
+            Feed
           </Link>
           <SignedIn>
+            <Link href="/post" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
+              Post
+            </Link>
+            <Link href="/profile" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
+              My Fits
+            </Link>
             <Link href="/my-votes" className="txt-meta opacity-60 hover:opacity-100 transition-opacity">
               My Votes
             </Link>
           </SignedIn>
           {isAdmin && (
-            <Link href="/admin" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
-              Admin
-            </Link>
+            <>
+              <Link href="/items" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
+                Items
+              </Link>
+              <Link href="/stats" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
+                Stats
+              </Link>
+              <Link href="/admin" className="txt-meta opacity-30 hover:opacity-100 transition-opacity">
+                Admin
+              </Link>
+            </>
           )}
         </nav>
       </div>
