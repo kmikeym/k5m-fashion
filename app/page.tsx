@@ -197,7 +197,7 @@ export default function Home() {
                     <div className="aspect-[3/4] overflow-hidden border border-ink/10">
                       <img
                         src={outfit.image}
-                        alt={outfit.description || 'Outfit'}
+                        alt={outfit.description || 'Fit'}
                         className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                         onError={(e) => {
                           const img = e.currentTarget;

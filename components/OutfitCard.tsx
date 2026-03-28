@@ -95,7 +95,7 @@ export default function OutfitCard({
             ) : (
               <img
                 src={outfit.image}
-                alt={outfit.description || 'Outfit'}
+                alt={outfit.description || 'Fit'}
                 onError={() => setImgError(true)}
               />
             )}

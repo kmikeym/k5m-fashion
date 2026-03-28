@@ -5,7 +5,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Fully Fashioned — K5M',
-  description: 'Dress with purpose. Rate outfits, discover what works.',
+  description: 'Dress with purpose. The daily fit check.',
 };
 
 export default function RootLayout({
