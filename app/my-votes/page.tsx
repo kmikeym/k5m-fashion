@@ -71,7 +71,7 @@ export default function MyVotesPage() {
             <h3 className="txt-display-solid">Yet</h3>
             <p className="txt-meta opacity-50 mt-4">
               <Link href="/" className="underline hover:opacity-70">
-                Go rate some outfits
+                Go vote on some fits
               </Link>
             </p>
           </div>
@@ -85,11 +85,11 @@ export default function MyVotesPage() {
               </div>
               <div>
                 <span className="metric-val">{hotVotes}</span>
-                <p className="txt-meta font-semibold uppercase mt-1">Hot</p>
+                <p className="txt-meta font-semibold uppercase mt-1">+</p>
               </div>
               <div>
                 <span className="metric-val outline">{notVotes}</span>
-                <p className="txt-meta font-semibold uppercase mt-1">Not</p>
+                <p className="txt-meta font-semibold uppercase mt-1">−</p>
               </div>
             </div>
 
@@ -136,7 +136,7 @@ export default function MyVotesPage() {
                           letterSpacing: '0.05em',
                         }}
                       >
-                        {v.vote}
+                        {v.vote === 'hot' ? '+' : '−'}
                       </div>
                     </div>
                   </Link>

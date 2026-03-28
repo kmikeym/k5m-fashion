@@ -144,6 +144,68 @@ body {
   color: transparent;
 }
 
+/* +/− vote buttons */
+.vote-btn-row {
+  display: flex;
+  border-top: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
+  position: relative;
+  z-index: 10;
+}
+
+.vote-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-primary);
+  font-size: 32px;
+  font-weight: 300;
+  transition: background-color 0.15s;
+}
+
+.vote-btn:active {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.vote-btn:first-child {
+  border-right: 1px solid var(--color-text);
+}
+
+/* Score display after voting */
+.score-display {
+  padding: 24px var(--pad);
+  border-top: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-text);
+  position: relative;
+  z-index: 10;
+}
+
+.score-pct {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.score-bar {
+  height: 6px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.08);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  background: var(--color-text);
+  transition: width 0.5s ease;
+}
+
 /* Data rows for analytics */
 .data-row {
   border-top: 1px solid var(--color-text);

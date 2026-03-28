@@ -29,6 +29,7 @@ export interface Outfit {
   description: string;
   items: string[]; // item IDs
   location?: string;
+  user_id?: string; // Clerk user ID of poster (optional for JSON compat)
 }
 
 export interface VoteTally {

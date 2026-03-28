@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 import { getD1 } from '@/lib/db';
 
 export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: 'Sign in to post' }, { status: 401 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('photo') as File | null;
+    const description = (formData.get('description') as string) || '';
 
     if (!file) {
       return NextResponse.json({ error: 'No photo provided' }, { status: 400 });
@@ -24,20 +31,20 @@ export async function POST(request: NextRequest) {
     const filename = `${dateStr}-${timestamp}.${ext}`;
     const id = `${dateStr}-${timestamp}`;
 
-    // Save metadata to D1
+    // Save metadata to D1 with user_id
     await db.prepare(
-      'INSERT INTO outfits (id, date, image, description, location) VALUES (?, ?, ?, ?, ?)'
-    ).bind(id, dateStr, `/outfits/${filename}`, '', '').run();
+      'INSERT INTO outfits (id, date, image, description, location, user_id) VALUES (?, ?, ?, ?, ?, ?)'
+    ).bind(id, dateStr, `/outfits/${filename}`, description, '', userId).run();
 
-    // Note: image file must be committed to repo separately for now
     // TODO: R2 integration for production image uploads
     return NextResponse.json({
       id,
       date: dateStr,
       image: `/outfits/${filename}`,
-      description: '',
+      description,
       items: [],
       location: '',
+      user_id: userId,
     }, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

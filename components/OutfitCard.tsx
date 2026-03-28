@@ -125,7 +125,7 @@ export default function OutfitCard({
             {/* Score badge */}
             {hotPct !== null && (
               <div className="absolute top-3 right-3 bg-white/90 px-2 py-1">
-                <span className="txt-meta font-bold">{hotPct}% Hot</span>
+                <span className="txt-meta font-bold">{hotPct}%</span>
               </div>
             )}
           </div>
@@ -143,25 +143,6 @@ export default function OutfitCard({
           </div>
         )}
 
-        {/* Vote results bar (when voted or just viewing) */}
-        {total > 0 && voted && (
-          <div className="mb-4">
-            <div className="flex h-2 overflow-hidden" style={{ border: '1px solid var(--color-text)' }}>
-              <div
-                className="bg-ink transition-all duration-500"
-                style={{ width: `${hotPct}%` }}
-              />
-              <div
-                className="bg-transparent transition-all duration-500"
-                style={{ width: `${100 - (hotPct || 0)}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-1">
-              <span className="txt-meta opacity-50">{hotPct}% Hot</span>
-              <span className="txt-meta opacity-50">{total} vote{total !== 1 ? 's' : ''}</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Vote error */}
@@ -188,46 +169,35 @@ export default function OutfitCard({
           </SignInButton>
         </div>
       ) : showVoting && !voted ? (
-        <div className="voting-actions">
+        <div className="vote-btn-row">
           <button
             onClick={() => vote('not')}
             disabled={loading}
-            className="vote-action-btn is-not"
+            className="vote-btn"
+            aria-label="Vote down"
           >
-            <span className="txt-meta font-semibold uppercase mb-2">
-              Cast Vote
-            </span>
-            <span className="txt-massive">NOT</span>
+            −
           </button>
           <button
             onClick={() => vote('hot')}
             disabled={loading}
-            className="vote-action-btn"
+            className="vote-btn"
+            aria-label="Vote up"
           >
-            <span className="txt-meta font-semibold uppercase mb-2">
-              Cast Vote
-            </span>
-            <span className="txt-massive">HOT</span>
+            +
           </button>
         </div>
       ) : showVoting && voted ? (
-        <div
-          className="flex items-center justify-between relative z-10"
-          style={{
-            padding: '16px var(--pad)',
-            borderTop: '1px solid var(--color-text)',
-            borderBottom: '1px solid var(--color-text)',
-          }}
-        >
-          <span className="txt-meta font-semibold uppercase">
-            You voted{' '}
-            <span className={voted === 'hot' ? 'font-bold' : 'opacity-60'}>
-              {voted}
-            </span>
-          </span>
-          <span className="txt-meta opacity-50">
-            {hotCount} hot &middot; {notCount} not
-          </span>
+        <div className="score-display">
+          <div className="flex items-baseline gap-2">
+            <span className="score-pct">{hotPct !== null ? `${hotPct}%` : '—'}</span>
+          </div>
+          <div className="score-bar">
+            <div className="score-bar-fill" style={{ width: `${hotPct || 0}%` }} />
+          </div>
+          <p className="txt-meta opacity-50 mt-2">
+            {total} vote{total !== 1 ? 's' : ''}
+          </p>
         </div>
       ) : null}
     </div>

@@ -121,9 +121,9 @@ export default function Home() {
           style={{ padding: '48px var(--pad)' }}
         >
           <h2 className="txt-display-outline">All</h2>
-          <h3 className="txt-display-solid">Rated</h3>
+          <h3 className="txt-display-solid">Voted</h3>
           <p className="txt-meta opacity-50 mt-4">
-            {totalRated} outfits evaluated &middot;{' '}
+            {totalRated} fits voted on &middot;{' '}
             <Link href="/stats" className="underline hover:opacity-70">Check the stats</Link>
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function Home() {
           >
             <div className="mb-6">
               <p className="txt-meta font-semibold uppercase opacity-60">
-                All Outfits &middot; {totalOutfits} total
+                All Fits &middot; {totalOutfits} total
               </p>
             </div>
 
@@ -208,13 +208,11 @@ export default function Home() {
                           style={{
                             background: vote === 'hot' ? 'var(--color-text)' : 'rgba(255,255,255,0.85)',
                             color: vote === 'hot' ? '#fff' : 'var(--color-text)',
-                            fontSize: '8px',
+                            fontSize: '10px',
                             fontWeight: 700,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.05em',
                           }}
                         >
-                          {vote}
+                          {vote === 'hot' ? '+' : '−'}
                         </div>
                       )}
                     </div>
