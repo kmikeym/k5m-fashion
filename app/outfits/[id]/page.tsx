@@ -1,19 +1,70 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getOutfit, getOutfits, getItemsForOutfit, getDisplayName } from '@/lib/data';
-import { notFound } from 'next/navigation';
+import { getDisplayName } from '@/lib/data';
+import itemsData from '@/data/items.json';
 import OutfitCard from '@/components/OutfitCard';
 import ItemImage from '@/components/ItemImage';
+import type { Outfit, Item } from '@/lib/types';
 
-export function generateStaticParams() {
-  return getOutfits().map((o) => ({ id: o.id }));
-}
+export const runtime = 'edge';
 
-export default async function OutfitPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const outfit = getOutfit(id);
-  if (!outfit) notFound();
+export default function OutfitPage() {
+  const { id } = useParams<{ id: string }>();
+  const [outfit, setOutfit] = useState<Outfit | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const items = getItemsForOutfit(outfit);
+  const allItems = itemsData as Item[];
+
+  useEffect(() => {
+    fetch('/api/outfits')
+      .then((r) => r.json())
+      .then((data) => data as Outfit[])
+      .then((outfits) => {
+        const found = outfits.find((o) => o.id === id);
+        if (found) {
+          setOutfit(found);
+        } else {
+          setNotFound(true);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setNotFound(true);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="relative z-10 max-w-3xl mx-auto w-full" style={{ padding: '64px var(--pad)' }}>
+        <p className="txt-meta opacity-50">Loading...</p>
+      </div>
+    );
+  }
+
+  if (notFound || !outfit) {
+    return (
+      <div className="relative z-10 max-w-3xl mx-auto w-full" style={{ padding: '64px var(--pad)' }}>
+        <Link href="/" className="txt-meta opacity-50 hover:opacity-100 transition-opacity">
+          &larr; All Fits
+        </Link>
+        <div className="mt-8 text-center">
+          <h2 className="txt-display-outline">Not</h2>
+          <h3 className="txt-display-solid">Found</h3>
+          <p className="txt-meta opacity-50 mt-4">This outfit doesn&apos;t exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const items = outfit.items
+    .map((itemId) => allItems.find((i) => i.id === itemId))
+    .filter(Boolean) as Item[];
+
   const formattedDate = new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',

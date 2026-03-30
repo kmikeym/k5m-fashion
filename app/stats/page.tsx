@@ -1,10 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import outfitsData from '@/data/outfits.json';
-import itemsData from '@/data/items.json';
-import type { Outfit, Item } from '@/lib/types';
-import { getDisplayName } from '@/lib/data';
+import { useUser } from '@clerk/nextjs';
 
 interface ItemStat {
   id: string;
@@ -17,97 +14,25 @@ interface ItemStat {
   worstPair: { name: string; synergy: number } | null;
 }
 
+interface StatsResponse {
+  outfitCount: number;
+  itemCount: number;
+  totalVotes: number;
+  items: ItemStat[];
+}
+
 export default function StatsPage() {
-  const [itemStats, setItemStats] = useState<ItemStat[]>([]);
-  const [totalVotes, setTotalVotes] = useState(0);
+  const { user } = useUser();
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
 
-  const outfits = outfitsData as Outfit[];
-  const items = itemsData as Item[];
-
   useEffect(() => {
-    fetch('/api/votes')
+    fetch('/api/stats')
       .then((r) => r.json())
-      .then((data) => data as Record<string, { hot: number; not: number }>)
-      .then((allVotes) => {
-        const stats: Record<string, { hot: number; total: number; appearances: number }> = {};
-        for (const item of items) {
-          stats[item.id] = { hot: 0, total: 0, appearances: 0 };
-        }
-
-        let total = 0;
-        for (const outfit of outfits) {
-          const votes = allVotes[outfit.id];
-          if (!votes) continue;
-          const outfitTotal = votes.hot + votes.not;
-          total += outfitTotal;
-
-          for (const itemId of outfit.items) {
-            if (!stats[itemId]) continue;
-            stats[itemId].hot += votes.hot;
-            stats[itemId].total += outfitTotal;
-            stats[itemId].appearances++;
-          }
-        }
-
-        setTotalVotes(total);
-
-        const itemIds = items.map((i) => i.id);
-        const pairData: Record<string, { bestPair: { name: string; synergy: number } | null; worstPair: { name: string; synergy: number } | null }> = {};
-
-        for (const a of itemIds) {
-          let best: { name: string; synergy: number } | null = null;
-          let worst: { name: string; synergy: number } | null = null;
-
-          for (const b of itemIds) {
-            if (a === b) continue;
-            let pairHot = 0;
-            let pairTotal = 0;
-
-            for (const outfit of outfits) {
-              if (!outfit.items.includes(a) || !outfit.items.includes(b)) continue;
-              const votes = allVotes[outfit.id];
-              if (!votes) continue;
-              pairHot += votes.hot;
-              pairTotal += votes.hot + votes.not;
-            }
-
-            if (pairTotal === 0) continue;
-
-            const pairRate = pairHot / pairTotal;
-            const rateA = stats[a]?.total > 0 ? stats[a].hot / stats[a].total : 0;
-            const rateB = stats[b]?.total > 0 ? stats[b].hot / stats[b].total : 0;
-            const synergy = Math.round((pairRate - (rateA + rateB) / 2) * 100);
-            const bItem = items.find((x) => x.id === b);
-            const bName = bItem ? getDisplayName(bItem) : b;
-
-            if (best === null || synergy > best.synergy) best = { name: bName, synergy };
-            if (worst === null || synergy < worst.synergy) worst = { name: bName, synergy };
-          }
-
-          pairData[a] = { bestPair: best, worstPair: worst };
-        }
-
-        const computed: ItemStat[] = items.map((item) => ({
-          id: item.id,
-          name: getDisplayName(item),
-          category: item.category,
-          appearances: stats[item.id]?.appearances || 0,
-          hotRate: stats[item.id]?.total > 0 ? stats[item.id].hot / stats[item.id].total : null,
-          totalVotes: stats[item.id]?.total || 0,
-          bestPair: pairData[item.id]?.bestPair || null,
-          worstPair: pairData[item.id]?.worstPair || null,
-        }));
-
-        computed.sort((a, b) => {
-          if (a.hotRate === null && b.hotRate === null) return 0;
-          if (a.hotRate === null) return 1;
-          if (b.hotRate === null) return -1;
-          return b.hotRate - a.hotRate;
-        });
-
-        setItemStats(computed);
+      .then((data) => data as StatsResponse)
+      .then((data) => {
+        setStats(data);
         setLoading(false);
       })
       .catch(() => {
@@ -130,29 +55,36 @@ export default function StatsPage() {
           <p className="txt-meta mb-4">System Intelligence</p>
           <h2 className="txt-display-outline">Wardrobe</h2>
           <h3 className="txt-display-solid">Correlations</h3>
+          {user && (
+            <p className="txt-meta opacity-50 mt-2">
+              Stats for your outfits only
+            </p>
+          )}
         </div>
 
         {/* Summary */}
-        <div className="flex gap-8 mb-12">
-          <div>
-            <span className="metric-val">{outfits.length}</span>
-            <p className="txt-meta font-semibold uppercase mt-1">Outfits</p>
+        {stats && (
+          <div className="flex gap-8 mb-12">
+            <div>
+              <span className="metric-val">{stats.outfitCount}</span>
+              <p className="txt-meta font-semibold uppercase mt-1">Outfits</p>
+            </div>
+            <div>
+              <span className="metric-val">{stats.itemCount}</span>
+              <p className="txt-meta font-semibold uppercase mt-1">Items</p>
+            </div>
+            <div>
+              <span className="metric-val">{stats.totalVotes}</span>
+              <p className="txt-meta font-semibold uppercase mt-1">Votes</p>
+            </div>
           </div>
-          <div>
-            <span className="metric-val">{items.length}</span>
-            <p className="txt-meta font-semibold uppercase mt-1">Items</p>
-          </div>
-          <div>
-            <span className="metric-val">{totalVotes}</span>
-            <p className="txt-meta font-semibold uppercase mt-1">Votes</p>
-          </div>
-        </div>
+        )}
 
         {loading ? (
           <p className="txt-meta opacity-50">Loading vote data...</p>
         ) : fetchError ? (
           <p className="txt-meta opacity-50">Couldn&apos;t load vote data — try refreshing</p>
-        ) : totalVotes === 0 ? (
+        ) : !stats || stats.totalVotes === 0 ? (
           <div className="py-16">
             <h2 className="txt-display-outline">No Votes</h2>
             <h3 className="txt-display-solid">Yet</h3>
@@ -162,7 +94,7 @@ export default function StatsPage() {
           </div>
         ) : (
           <div className="flex flex-col">
-            {itemStats.map((stat) => {
+            {stats.items.map((stat) => {
               const score = stat.hotRate !== null ? Math.round(stat.hotRate * 100) : null;
               const isLow = score !== null && score < 50;
               const synergy = stat.bestPair && stat.bestPair.synergy > 0

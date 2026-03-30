@@ -6,9 +6,10 @@ import { useUser } from '@clerk/nextjs';
 import OutfitCard from '@/components/OutfitCard';
 import itemsData from '@/data/items.json';
 import type { Outfit, Item } from '@/lib/types';
+import { GENERAL_USER_ID } from '@/lib/constants';
 
 export default function Home() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const allItems = itemsData as Item[];
 
   const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
@@ -18,6 +19,8 @@ export default function Home() {
   const [myVotes, setMyVotes] = useState<Record<string, 'hot' | 'not'>>({});
   const [tallies, setTallies] = useState<Record<string, { hot: number; not: number }>>({});
   const [fetchError, setFetchError] = useState(false);
+  const [archiveFilter, setArchiveFilter] = useState<'all' | 'mine' | 'general'>('all');
+  const [allOutfitCount, setAllOutfitCount] = useState(0);
 
   const refresh = useCallback(() => {
     setFetchError(false);
@@ -34,14 +37,10 @@ export default function Home() {
       })
       .catch(() => setFetchError(true));
 
-    // Fetch ALL outfits for archive grid (including own)
+    // Fetch total outfit count (unfiltered) for hero stats
     fetch('/api/outfits')
       .then((r) => r.json())
-      .then((data) => {
-        setArchiveOutfits((data as Outfit[]).sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        ));
-      })
+      .then((data) => setAllOutfitCount((data as Outfit[]).length))
       .catch(() => {});
 
     // Fetch all tallies
@@ -85,11 +84,33 @@ export default function Home() {
     refresh();
   }, [refresh]);
 
+  // Fetch archive outfits (responds to filter changes)
+  const fetchArchive = useCallback(() => {
+    let archiveUrl = '/api/outfits';
+    if (archiveFilter === 'mine' && user?.id) {
+      archiveUrl = `/api/outfits?user_id=${user.id}`;
+    } else if (archiveFilter === 'general') {
+      archiveUrl = `/api/outfits?user_id=${GENERAL_USER_ID}`;
+    }
+    fetch(archiveUrl)
+      .then((r) => r.json())
+      .then((data) => {
+        setArchiveOutfits((data as Outfit[]).sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        ));
+      })
+      .catch(() => {});
+  }, [archiveFilter, user?.id]);
+
   useEffect(() => {
-    const handler = () => setTimeout(() => refresh(), 500);
+    fetchArchive();
+  }, [fetchArchive]);
+
+  useEffect(() => {
+    const handler = () => setTimeout(() => { refresh(); fetchArchive(); }, 500);
     window.addEventListener('outfit-voted', handler);
     return () => window.removeEventListener('outfit-voted', handler);
-  }, [refresh]);
+  }, [refresh, fetchArchive]);
 
   const currentOutfit = queue.length > 0 ? queue[0] : null;
 
@@ -99,7 +120,8 @@ export default function Home() {
       .filter(Boolean) as Item[];
   }
 
-  const totalOutfits = archiveOutfits.length;
+  const totalOutfits = allOutfitCount;
+  const filteredOutfitCount = archiveOutfits.length;
   const totalRated = votedIds.size;
 
   return (
@@ -166,7 +188,7 @@ export default function Home() {
       )}
 
       {/* Archive Grid */}
-      {totalOutfits > 0 && (
+      {(totalOutfits > 0 || filteredOutfitCount > 0) && (
         <section
           className="relative z-10 w-full"
           style={{ borderTop: '1px solid var(--color-text)' }}
@@ -175,10 +197,23 @@ export default function Home() {
             className="max-w-3xl mx-auto w-full"
             style={{ padding: '48px var(--pad)' }}
           >
-            <div className="mb-6">
+            <div className="mb-6 flex items-baseline justify-between">
               <p className="txt-meta font-semibold uppercase opacity-60">
-                All Fits &middot; {totalOutfits} total
+                {archiveFilter === 'all' ? 'All Fits' : archiveFilter === 'mine' ? 'My Fits' : 'Editorial'} &middot; {filteredOutfitCount} total
               </p>
+              {isSignedIn && (
+                <div className="flex gap-4">
+                  {(['all', 'mine', 'general'] as const).map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setArchiveFilter(f)}
+                      className={`txt-meta font-semibold uppercase transition-opacity ${archiveFilter === f ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
+                    >
+                      {f === 'all' ? 'All' : f === 'mine' ? 'My Fits' : 'Editorial'}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1.5">

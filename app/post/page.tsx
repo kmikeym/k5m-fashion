@@ -3,15 +3,18 @@
 import { useState } from 'react';
 import { useUser, SignInButton } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+import { ADMIN_USER_ID } from '@/lib/constants';
 
 export default function PostPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [description, setDescription] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editorial, setEditorial] = useState(false);
+  const isAdmin = user?.id === ADMIN_USER_ID;
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -33,6 +36,7 @@ export default function PostPage() {
       const formData = new FormData();
       formData.append('photo', file);
       formData.append('description', description);
+      if (editorial) formData.append('bucket', 'general');
 
       const res = await fetch('/api/outfits/upload', {
         method: 'POST',
@@ -131,6 +135,19 @@ export default function PostPage() {
             {/* Error */}
             {error && (
               <p className="txt-meta text-red-600 mb-4">{error}</p>
+            )}
+
+            {/* Editorial toggle (admin only) */}
+            {isAdmin && (
+              <label className="flex items-center gap-2 mb-6 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editorial}
+                  onChange={(e) => setEditorial(e.target.checked)}
+                  className="accent-current"
+                />
+                <span className="txt-meta">Post as Editorial</span>
+              </label>
             )}
 
             {/* Submit */}

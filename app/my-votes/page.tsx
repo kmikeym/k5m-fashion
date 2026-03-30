@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser, SignInButton } from '@clerk/nextjs';
-import outfitsData from '@/data/outfits.json';
 import type { Outfit } from '@/lib/types';
 
 interface VoteRecord {
@@ -15,9 +14,8 @@ interface VoteRecord {
 export default function MyVotesPage() {
   const { isSignedIn, isLoaded } = useUser();
   const [myVotes, setMyVotes] = useState<VoteRecord[]>([]);
+  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const allOutfits = outfitsData as Outfit[];
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -25,10 +23,13 @@ export default function MyVotesPage() {
       return;
     }
 
-    fetch('/api/votes?mine=true')
-      .then((r) => r.json())
-      .then((data) => {
-        setMyVotes(data as VoteRecord[]);
+    Promise.all([
+      fetch('/api/votes?mine=true').then((r) => r.json()),
+      fetch('/api/outfits').then((r) => r.json()),
+    ])
+      .then(([votes, outfits]) => {
+        setMyVotes(votes as VoteRecord[]);
+        setAllOutfits(outfits as Outfit[]);
         setLoading(false);
       })
       .catch(() => setLoading(false));
