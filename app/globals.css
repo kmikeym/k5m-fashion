@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --color-text: #0d0d0d;
-  --color-line: rgba(13, 13, 13, 0.3);
+  /* The Instrument: neutral near-black ground, off-white text.
+     The gradients are NOT chrome — they are the vote-result verdict bloom only. */
+  --color-ground: #0d0d0d;
+  --color-text: #f4f4f2;
+  --color-line: rgba(244, 244, 242, 0.22);
   --grad-warm: linear-gradient(160deg, #f4f4f6 0%, #ff8a76 45%, #ea4632 100%);
   --grad-cool: linear-gradient(160deg, #eef3f7 0%, #8dbdf1 45%, #3c5ac8 100%);
   --font-primary: 'Helvetica Neue', Helvetica, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
@@ -17,13 +20,14 @@
 }
 
 body {
-  background: var(--grad-warm);
+  background: var(--color-ground);
   font-family: var(--font-primary);
   color: var(--color-text);
   min-height: 100vh;
 }
 
-/* Noise overlay — subtle */
+/* Noise overlay — barely-there grain. The Instrument is clean, so the
+   zine texture is reduced to a whisper over the black ground. */
 .noise-overlay {
   position: fixed;
   top: 0;
@@ -32,9 +36,8 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 50;
-  opacity: 0.15;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
 }
 
 /* Typography */
@@ -83,10 +86,10 @@ body {
 /* Photo treatment */
 .fit-photo-container {
   width: 100%;
-  background-color: #d8d8d8;
+  background-color: #1a1a1a;
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--color-text);
+  border: 1px solid var(--color-line);
 }
 
 .fit-photo-container img {
@@ -98,7 +101,7 @@ body {
 /* Photo tags */
 .photo-tag {
   background: var(--color-text);
-  color: #fff;
+  color: var(--color-ground);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 6px;
@@ -110,8 +113,8 @@ body {
 /* +/− vote buttons */
 .vote-btn-row {
   display: flex;
-  border-top: 1px solid var(--color-text);
-  border-bottom: 1px solid var(--color-text);
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
   position: relative;
   z-index: 10;
 }
@@ -132,18 +135,18 @@ body {
 }
 
 .vote-btn:active {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .vote-btn:first-child {
-  border-right: 1px solid var(--color-text);
+  border-right: 1px solid var(--color-line);
 }
 
 /* Score display after voting */
 .score-display {
   padding: 24px var(--pad);
-  border-top: 1px solid var(--color-text);
-  border-bottom: 1px solid var(--color-text);
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
   position: relative;
   z-index: 10;
 }
@@ -158,7 +161,7 @@ body {
 .score-bar {
   height: 6px;
   width: 100%;
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.12);
   margin-top: 8px;
   overflow: hidden;
 }
@@ -171,7 +174,7 @@ body {
 
 /* Data rows for analytics */
 .data-row {
-  border-top: 1px solid var(--color-text);
+  border-top: 1px solid var(--color-line);
   padding: 16px 0;
   display: grid;
   grid-template-columns: 1fr auto;
@@ -180,7 +183,7 @@ body {
 }
 
 .data-row:last-child {
-  border-bottom: 1px solid var(--color-text);
+  border-bottom: 1px solid var(--color-line);
 }
 
 .metric-val {
@@ -242,7 +245,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 1px 5px;
-  border: 1px solid var(--color-text);
+  border: 1px solid var(--color-line);
 }
 
 /* Outfit image fallback */
@@ -252,8 +255,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.3);
-  border: 1px solid var(--color-text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-line);
 }
 
 /* Lightbox overlay */

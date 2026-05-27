@@ -16,7 +16,7 @@ function CircularStamp() {
       />
       <text>
         <textPath href="#circlePath" startOffset="0%">
-          Fully Fashioned &bull; The Daily Fit Check &bull;
+          Fully Fashioned &bull; Taste Is Quantifiable &bull;
         </textPath>
       </text>
     </svg>

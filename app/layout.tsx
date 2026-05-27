@@ -5,7 +5,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Fully Fashioned — K5M',
-  description: 'Dress with purpose. The daily fit check.',
+  description: 'Taste is quantifiable.',
 };
 
 export default function RootLayout({
@@ -37,7 +37,7 @@ export default function RootLayout({
                 Fully Fashioned &mdash; A KmikeyM &times; curtmerrill collaboration
               </p>
               <p className="txt-meta opacity-25 mt-1">
-                Dress with purpose &mdash; since 2012
+                Since 2012
               </p>
             </div>
           </div>
