@@ -132,8 +132,7 @@ export default function Home() {
         style={{ padding: '0 var(--pad) 24px' }}
       >
         <div className="mb-2">
-          <h1 className="txt-display-outline">Daily Fit</h1>
-          <h2 className="txt-display-solid">Evaluation</h2>
+          <h1 className="txt-display-solid">Daily Fit Evaluation</h1>
         </div>
         {isSignedIn && (
           <p className="txt-meta opacity-60">
@@ -157,8 +156,7 @@ export default function Home() {
           className="relative z-10 text-center max-w-3xl mx-auto w-full"
           style={{ padding: '80px var(--pad)' }}
         >
-          <h2 className="txt-display-outline">No Fits</h2>
-          <h3 className="txt-display-solid">Yet</h3>
+          <h2 className="txt-display-solid">No Fits Yet</h2>
           <p className="txt-meta opacity-50 mt-4">
             Add outfits to data/outfits.json
           </p>
@@ -168,8 +166,7 @@ export default function Home() {
           className="relative z-10 text-center max-w-3xl mx-auto w-full"
           style={{ padding: '48px var(--pad)' }}
         >
-          <h2 className="txt-display-outline">All</h2>
-          <h3 className="txt-display-solid">Voted</h3>
+          <h2 className="txt-display-solid">All Voted</h2>
           <p className="txt-meta opacity-50 mt-4">
             {totalRated} fits voted on &middot;{' '}
             <Link href="/stats" className="underline hover:opacity-70">Check the stats</Link>
@@ -191,7 +188,7 @@ export default function Home() {
       {(totalOutfits > 0 || filteredOutfitCount > 0) && (
         <section
           className="relative z-10 w-full"
-          style={{ borderTop: '1px solid var(--color-text)' }}
+          style={{ borderTop: '1px solid var(--color-line)' }}
         >
           <div
             className="max-w-3xl mx-auto w-full"
