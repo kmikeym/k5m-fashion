@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
+import { MIN_VOTES } from '@/lib/verdict';
 
 interface ItemStat {
   id: string;
@@ -45,16 +46,14 @@ export default function StatsPage() {
     <section
       className="relative z-10 flex flex-col w-full"
       style={{
-        background: 'var(--grad-cool)',
-        borderTop: '1px solid var(--color-text)',
+        borderTop: '1px solid var(--color-line)',
       }}
     >
       <div className="max-w-3xl mx-auto w-full" style={{ padding: '64px var(--pad)' }}>
         {/* Header */}
         <div className="mb-12">
-          <p className="txt-meta mb-4">System Intelligence</p>
-          <h2 className="txt-display-outline">Wardrobe</h2>
-          <h3 className="txt-display-solid">Correlations</h3>
+          <p className="txt-meta opacity-60 mb-3">System Intelligence</p>
+          <h2 className="txt-display-solid">Wardrobe Correlations</h2>
           {user && (
             <p className="txt-meta opacity-50 mt-2">
               Stats for your outfits only
@@ -86,8 +85,7 @@ export default function StatsPage() {
           <p className="txt-meta opacity-50">Couldn&apos;t load vote data — try refreshing</p>
         ) : !stats || stats.totalVotes === 0 ? (
           <div className="py-16">
-            <h2 className="txt-display-outline">No Votes</h2>
-            <h3 className="txt-display-solid">Yet</h3>
+            <h2 className="txt-display-solid">No Votes Yet</h2>
             <p className="txt-meta opacity-50 mt-4">
               Vote on some outfits to see correlations
             </p>
@@ -95,6 +93,7 @@ export default function StatsPage() {
         ) : (
           <div className="flex flex-col">
             {stats.items.map((stat) => {
+              const belowThreshold = stat.totalVotes < MIN_VOTES;
               const score = stat.hotRate !== null ? Math.round(stat.hotRate * 100) : null;
               const isLow = score !== null && score < 50;
               const synergy = stat.bestPair && stat.bestPair.synergy > 0
@@ -112,7 +111,8 @@ export default function StatsPage() {
                     <span className="txt-meta uppercase opacity-70">
                       {stat.category}
                     </span>
-                    {synergy && (
+                    {/* Synergy is only shown once the item itself has a settled reading. */}
+                    {!belowThreshold && synergy && (
                       <div className="synergy-detail">
                         <span>{synergy.type}</span>
                         <span className="font-semibold">{synergy.label}</span>
@@ -120,14 +120,27 @@ export default function StatsPage() {
                     )}
                   </div>
                   <div className="flex gap-6 text-right">
-                    <div className="flex flex-col items-end">
-                      <span className={`metric-val ${isLow ? 'outline' : ''}`}>
-                        {score ?? '—'}
-                      </span>
-                      <span className="txt-meta font-semibold uppercase mt-1">
-                        Score
-                      </span>
-                    </div>
+                    {belowThreshold ? (
+                      <div className="flex flex-col items-end">
+                        <span className="txt-meta font-semibold uppercase opacity-50 leading-tight">
+                          Not Enough
+                          <br />
+                          Data
+                        </span>
+                        <span className="txt-meta opacity-40 mt-1">
+                          n={stat.totalVotes}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        <span className={`metric-val ${isLow ? 'outline' : ''}`}>
+                          {score}
+                        </span>
+                        <span className="txt-meta font-semibold uppercase mt-1">
+                          Score · n={stat.totalVotes}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
