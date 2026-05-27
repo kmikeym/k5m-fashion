@@ -2,7 +2,10 @@ name = "k5m-fashion"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# STAGING branch — bound to the isolated staging DB (k5m-fashion-staging-db).
+# Production (master) points at k5m-fashion-db (a61d4250-...). Keep these divergent;
+# on merge staging→master, always keep master's database_id. See DEPLOY.md.
 [[d1_databases]]
 binding = "DB"
-database_name = "k5m-fashion-votes"
-database_id = "a61d4250-9551-467c-8c2d-0860092c68c9"
+database_name = "k5m-fashion-staging-db"
+database_id = "7452fae8-7266-48c6-b85c-0962ead872cc"
