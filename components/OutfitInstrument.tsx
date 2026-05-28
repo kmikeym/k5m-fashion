@@ -125,10 +125,10 @@ export default function OutfitInstrument({ outfit }: Props) {
     const diff = instScore - roomScore;
     gapLine =
       Math.abs(diff) < 0.5
-        ? 'The room and the instrument agree.'
+        ? 'The instrument and the room agree.'
         : diff > 0
-        ? 'The data rates this higher than the room does.'
-        : 'The room likes this more than the data does.';
+        ? 'The instrument rates this above the room.'
+        : 'The room rates this above the instrument.';
   } else if (instScore != null) {
     gapLine = 'Not enough votes yet — the instrument is holding the line.';
   }
