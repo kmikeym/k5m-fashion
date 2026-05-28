@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import { SignedIn, SignedOut } from './AuthGate';
 
@@ -16,7 +17,7 @@ function CircularStamp() {
       />
       <text>
         <textPath href="#circlePath" startOffset="0%">
-          Fully Fashioned &bull; The Daily Fit Check &bull;
+          Fully Fashioned &bull; Taste Is Quantifiable &bull;
         </textPath>
       </text>
     </svg>
@@ -25,7 +26,13 @@ function CircularStamp() {
 
 export default function Header() {
   const { user } = useUser();
+  const pathname = usePathname();
   const isAdmin = user?.primaryEmailAddress?.emailAddress === ADMIN_EMAIL;
+
+  // The outfit screen (#15) is its own instrument — its stamp bar is the only
+  // top chrome, so the global nav header is suppressed there to keep the photo
+  // and vote above the fold for story-link arrivals.
+  if (pathname?.startsWith('/outfits/')) return null;
 
   return (
     <header

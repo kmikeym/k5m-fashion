@@ -13,16 +13,6 @@
     "location": ""
   },
   {
-    "id": "img-9638",
-    "date": "2025-08-01",
-    "image": "/outfits/IMG_9638.jpeg",
-    "description": "Dogs Walk",
-    "items": [
-      "dodgers-hat"
-    ],
-    "location": ""
-  },
-  {
     "id": "img-9262",
     "date": "2025-07-01",
     "image": "/outfits/IMG_9262.JPG",
@@ -69,29 +59,11 @@
     "location": ""
   },
   {
-    "id": "img-1530",
-    "date": "2025-02-01",
-    "image": "/outfits/IMG_1530.jpeg",
-    "description": "Aspirational",
-    "items": [],
-    "location": ""
-  },
-  {
     "id": "img-1447",
     "date": "2025-01-01",
     "image": "/outfits/IMG_1447.jpeg",
     "description": "Young Mike",
     "items": [],
-    "location": ""
-  },
-  {
-    "id": "img-0950",
-    "date": "2024-12-01",
-    "image": "/outfits/IMG_0950.jpeg",
-    "description": "Dress For the Job You Want",
-    "items": [
-      "tuxedo"
-    ],
     "location": ""
   },
   {
@@ -152,25 +124,9 @@
     "location": ""
   },
   {
-    "id": "sf-118",
-    "date": "2018-01-01",
-    "image": "/outfits/sf-118.jpg",
-    "description": "",
-    "items": [],
-    "location": "San Francisco"
-  },
-  {
     "id": "2017-04-21",
     "date": "2017-04-21",
     "image": "/outfits/2017-04-21.jpg",
-    "description": "",
-    "items": [],
-    "location": ""
-  },
-  {
-    "id": "mg-4509",
-    "date": "2015-01-01",
-    "image": "/outfits/_MG_4509.jpg",
     "description": "",
     "items": [],
     "location": ""
