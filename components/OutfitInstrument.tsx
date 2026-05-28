@@ -1,73 +1,106 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser, SignInButton } from '@clerk/nextjs';
 import type { Outfit } from '@/lib/types';
-import { getVerdict } from '@/lib/verdict';
+import { useDeviceToken } from '@/lib/useDeviceToken';
+import { MIN_VOTES } from '@/lib/verdict';
 
-interface OutfitInstrumentProps {
+interface Props {
   outfit: Outfit;
 }
 
+interface Instrument {
+  score: number;
+  revised: boolean;
+  asOf: string | null;
+}
+
+const REVEAL_DELAY = 750; // Law 2: withhold the beat before the number lands.
+
 /**
- * The voting half of the outfit screen (#15) — the line + prompt, the HOT/NOT
- * tap targets, and the verdict bloom that lands after a vote. This is where
- * ~80% of arrivals meet the product, so the vote is one tap and the reward is
- * watching the reading fill in.
+ * The verdict half of the outfit screen (#15, 2026-05-28). Two numbers, one gap:
+ * THE INSTRUMENT (computed, carries cold-start) beside THE ROOM (crowd HIT-rate,
+ * settled-at-reveal). Login-free voting via device token; sign-in is offered after
+ * the verdict as a "claim your taste" upgrade. Honors Seshat's seven laws.
  */
-export default function OutfitInstrument({ outfit }: OutfitInstrumentProps) {
-  const { isSignedIn, isLoaded } = useUser();
-  const [voted, setVoted] = useState<'hot' | 'not' | null>(null);
-  const [hot, setHot] = useState(0);
-  const [not, setNot] = useState(0);
+export default function OutfitInstrument({ outfit }: Props) {
+  const token = useDeviceToken();
+  const { isSignedIn } = useUser();
+
+  const [instrument, setInstrument] = useState<Instrument | null>(null);
+  // THE ROOM is frozen at load (Law 3): the user's tap never moves this number.
+  const [room, setRoom] = useState<{ hot: number; not: number } | null>(null);
+  const [myVote, setMyVote] = useState<'hot' | 'not' | null>(null);
+
+  const [charging, setCharging] = useState<'hit' | 'miss' | null>(null);
+  const [voted, setVoted] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [voteError, setVoteError] = useState(false);
-  const [bloomIn, setBloomIn] = useState(false);
 
+  const mergedRef = useRef(false);
+
+  // THE INSTRUMENT — computed, independent of the room, shows even at vote #1.
   useEffect(() => {
-    fetch(`/api/votes?outfit_id=${outfit.id}`)
+    fetch(`/api/instrument?outfit_id=${outfit.id}`)
       .then((r) => r.json())
-      .then((data) => data as { hot?: number; not?: number; myVote?: 'hot' | 'not' })
-      .then((data) => {
-        setHot(data.hot || 0);
-        setNot(data.not || 0);
-        if (data.myVote) setVoted(data.myVote);
-      })
+      .then((d) => setInstrument(d as Instrument))
       .catch(() => {});
   }, [outfit.id]);
 
-  // Trigger the bloom animation once a verdict is showing.
+  // THE ROOM tally + this device's prior vote (resolved by token or Clerk id).
+  useEffect(() => {
+    const q = token ? `&token=${encodeURIComponent(token)}` : '';
+    fetch(`/api/votes?outfit_id=${outfit.id}${q}`)
+      .then((r) => r.json())
+      .then((d) => d as { hot?: number; not?: number; myVote?: 'hot' | 'not' })
+      .then((d) => {
+        setRoom({ hot: d.hot || 0, not: d.not || 0 });
+        if (d.myVote) {
+          setMyVote(d.myVote);
+          setVoted(true);
+        }
+      })
+      .catch(() => {});
+  }, [outfit.id, token]);
+
+  // Merge anon vote history into the account once, after sign-in.
+  useEffect(() => {
+    if (isSignedIn && token && !mergedRef.current) {
+      mergedRef.current = true;
+      fetch('/api/votes/merge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      }).catch(() => {});
+    }
+  }, [isSignedIn, token]);
+
   useEffect(() => {
     if (voted) {
-      const t = setTimeout(() => setBloomIn(true), 60);
+      const t = setTimeout(() => setRevealed(true), REVEAL_DELAY);
       return () => clearTimeout(t);
     }
   }, [voted]);
 
-  async function vote(choice: 'hot' | 'not') {
+  async function vote(choice: 'hit' | 'miss') {
     if (voted || loading) return;
     setLoading(true);
     setVoteError(false);
-
     try {
       const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outfit_id: outfit.id, vote: choice === 'hot' ? 1 : 0 }),
+        body: JSON.stringify({ outfit_id: outfit.id, vote: choice === 'hit' ? 1 : 0, token }),
       });
-
       if (res.ok || res.status === 409) {
-        // 409 = already voted in a past session; reveal the verdict either way.
-        if (res.ok) {
-          if (choice === 'hot') setHot((c) => c + 1);
-          else setNot((c) => c + 1);
-        }
-        setVoted(choice);
+        setMyVote(choice === 'hit' ? 'hot' : 'not');
+        setVoted(true);
         setLoading(false);
         window.dispatchEvent(new CustomEvent('outfit-voted'));
         return;
       }
-
       setVoteError(true);
       setTimeout(() => setVoteError(false), 4000);
     } catch {
@@ -77,81 +110,119 @@ export default function OutfitInstrument({ outfit }: OutfitInstrumentProps) {
     setLoading(false);
   }
 
-  const verdict = getVerdict(hot, not, outfit.id);
-  const isPredictive = verdict.state === 'predictive';
-  const pct = verdict.pct ?? 0;
+  // --- Derived readings ---
+  const roomTotal = room ? room.hot + room.not : 0;
+  const roomHasData = roomTotal >= MIN_VOTES;
+  const roomRate = roomTotal > 0 ? room!.hot / roomTotal : null;
+  const roomScore = roomRate != null ? Math.round(roomRate * 100) / 10 : null; // /10, 1 dp
+  const roomPct = roomRate != null ? Math.round(roomRate * 100) : null;
+  const instScore = instrument ? instrument.score : null;
+  // Color is the reading (Law 6): the room when it has data, else the instrument's lean.
+  const isHit = roomHasData ? roomRate! >= 0.5 : instScore != null ? instScore >= 5 : true;
 
-  // --- Verdict bloom (after voting) ---
+  let gapLine = '';
+  if (roomHasData && instScore != null && roomScore != null) {
+    const diff = instScore - roomScore;
+    gapLine =
+      Math.abs(diff) < 0.5
+        ? 'The room and the instrument agree.'
+        : diff > 0
+        ? 'The data rates this higher than the room does.'
+        : 'The room likes this more than the data does.';
+  } else if (instScore != null) {
+    gapLine = 'Not enough votes yet — the instrument is holding the line.';
+  }
+
+  // ===== Verdict bloom (after voting) =====
   if (voted) {
     return (
       <div
         className="relative z-10"
         style={{
-          background: verdict.isHot ? 'var(--grad-warm)' : 'var(--grad-cool)',
+          background: isHit ? 'var(--grad-warm)' : 'var(--grad-cool)',
           color: 'var(--color-ground)',
-          padding: '40px var(--pad) 48px',
+          padding: '36px var(--pad) 44px',
           borderTop: '1px solid var(--color-line)',
-          opacity: bloomIn ? 1 : 0,
+          opacity: revealed ? 1 : 0,
           transition: 'opacity 0.4s ease',
         }}
       >
-        <p
-          className="txt-meta font-semibold uppercase"
-          style={{ letterSpacing: '0.14em', opacity: 0.7 }}
-        >
-          {isPredictive ? 'Predictive Analysis · Not Enough Data' : 'The Verdict'}
-        </p>
-
-        <div className="flex items-baseline gap-3 mt-2">
-          <span className="txt-massive">
-            {isPredictive ? '~' : ''}{pct}%
-          </span>
-          <span
-            className="font-bold uppercase"
-            style={{ fontSize: 20, letterSpacing: '0.04em' }}
-          >
-            {verdict.isHot ? 'Hot' : 'Not'}
-          </span>
-        </div>
-
-        {/* Animated fill — the reward for voting is watching the reading land. */}
-        <div
-          style={{
-            height: 8,
-            width: '100%',
-            background: 'rgba(13,13,13,0.14)',
-            marginTop: 16,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              height: '100%',
-              width: bloomIn ? `${pct}%` : '0%',
-              background: 'var(--color-ground)',
-              transition: 'width 0.7s cubic-bezier(0.22, 1, 0.36, 1)',
-            }}
+        {/* Two numbers, side by side on a shared /10 scale */}
+        <div className="flex items-start justify-between" style={{ gap: 16 }}>
+          <Reading
+            label="The Instrument"
+            value={instScore != null ? instScore.toFixed(1) : '—'}
+            sub={
+              instrument?.revised
+                ? `revised · as of ${instrument.asOf}`
+                : 'computed from the pieces'
+            }
+            revealed={revealed}
+          />
+          <Reading
+            label="The Room"
+            value={roomHasData ? roomScore!.toFixed(1) : 'N/A'}
+            sub={
+              roomHasData
+                ? `${roomPct}% HIT · n=${roomTotal}`
+                : `NOT ENOUGH DATA · n=${roomTotal}`
+            }
+            align="right"
+            revealed={revealed}
+            muted={!roomHasData}
           />
         </div>
 
-        <p className="txt-meta mt-3" style={{ opacity: 0.65 }}>
-          {isPredictive
-            ? `Projected from ${verdict.n} vote${verdict.n !== 1 ? 's' : ''} · firms up at 5`
-            : `${verdict.n} vote${verdict.n !== 1 ? 's' : ''}`}
+        {/* Spectrum: locate both numbers against each other (Law 5) */}
+        <div style={{ position: 'relative', height: 2, background: 'rgba(13,13,13,0.18)', marginTop: 22 }}>
+          {instScore != null && <Tick pos={instScore / 10} revealed={revealed} solid />}
+          {roomHasData && roomScore != null && <Tick pos={roomScore / 10} revealed={revealed} />}
+        </div>
+        <div className="flex justify-between" style={{ marginTop: 6 }}>
+          <span style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 9, opacity: 0.5 }}>0</span>
+          <span style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 9, opacity: 0.5 }}>10</span>
+        </div>
+
+        {/* The gap — the payoff, not decoration */}
+        {gapLine && (
+          <p className="mt-5" style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.3, maxWidth: '22em' }}>
+            {gapLine}
+          </p>
+        )}
+
+        <p className="txt-meta mt-2" style={{ opacity: 0.6 }}>
+          You said {myVote === 'hot' ? 'HIT' : 'MISS'}.
         </p>
+
+        {/* Login = claim your taste, only after the verdict */}
+        {!isSignedIn && (
+          <div className="mt-5" style={{ borderTop: '1px solid rgba(13,13,13,0.15)', paddingTop: 16 }}>
+            <SignInButton mode="modal">
+              <button
+                className="font-bold uppercase cursor-pointer"
+                style={{ fontSize: 12, letterSpacing: '0.08em', textDecoration: 'underline' }}
+              >
+                Claim your taste &rarr;
+              </button>
+            </SignInButton>
+            <p className="txt-meta mt-1" style={{ opacity: 0.6 }}>
+              Keep your votes, see where you stand vs the room, get pinged when a score moves.
+            </p>
+          </div>
+        )}
       </div>
     );
   }
 
-  // --- Pre-vote: the line, the prompt, and the tap targets ---
+  // ===== Pre-vote: the line, the prompt, the tap targets =====
   return (
     <div className="relative z-10">
-      <div style={{ padding: '28px var(--pad) 20px' }}>
+      <div style={{ padding: '28px var(--pad) 18px' }}>
         <p className="txt-display-solid" style={{ fontSize: 28 }}>
           Taste is quantifiable.
         </p>
         <p className="txt-meta uppercase mt-2" style={{ opacity: 0.6, letterSpacing: '0.14em' }}>
-          Hot or not?
+          Hit or miss?
         </p>
       </div>
 
@@ -163,46 +234,129 @@ export default function OutfitInstrument({ outfit }: OutfitInstrumentProps) {
         </div>
       )}
 
-      {!isLoaded ? (
-        <div className="vote-btn-row">
-          <div className="vote-btn" style={{ opacity: 0.3 }}>·</div>
-        </div>
-      ) : !isSignedIn ? (
-        <SignInButton mode="modal">
-          <button
-            className="vote-btn-row w-full cursor-pointer"
-            style={{ background: 'transparent' }}
-          >
-            <span
-              className="vote-btn font-bold uppercase"
-              style={{ fontSize: 16, letterSpacing: '0.08em', fontWeight: 700 }}
-            >
-              Sign in &amp; vote
-            </span>
-          </button>
-        </SignInButton>
-      ) : (
-        <div className="vote-btn-row">
-          <button
-            onClick={() => vote('not')}
-            disabled={loading}
-            className="vote-btn font-bold uppercase"
-            style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.06em' }}
-            aria-label="Vote not"
-          >
-            Not
-          </button>
-          <button
-            onClick={() => vote('hot')}
-            disabled={loading}
-            className="vote-btn font-bold uppercase"
-            style={{ fontSize: 22, fontWeight: 700, letterSpacing: '0.06em' }}
-            aria-label="Vote hot"
-          >
-            Hot
-          </button>
-        </div>
-      )}
+      <div className="vote-btn-row">
+        <PressButton
+          label="Miss"
+          charging={charging === 'miss'}
+          disabled={loading}
+          onDown={() => setCharging('miss')}
+          onCancel={() => !loading && setCharging(null)}
+          onCommit={() => vote('miss')}
+        />
+        <PressButton
+          label="Hit"
+          charging={charging === 'hit'}
+          disabled={loading}
+          onDown={() => setCharging('hit')}
+          onCancel={() => !loading && setCharging(null)}
+          onCommit={() => vote('hit')}
+        />
+      </div>
     </div>
+  );
+}
+
+// One number in the dual readout.
+function Reading({
+  label,
+  value,
+  sub,
+  align = 'left',
+  revealed,
+  muted = false,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  align?: 'left' | 'right';
+  revealed: boolean;
+  muted?: boolean;
+}) {
+  return (
+    <div style={{ textAlign: align, opacity: muted ? 0.55 : 1 }}>
+      <p className="txt-meta font-semibold uppercase" style={{ letterSpacing: '0.12em', opacity: 0.7 }}>
+        {label}
+      </p>
+      <span
+        className="txt-massive"
+        style={{
+          display: 'inline-block',
+          fontVariantNumeric: 'tabular-nums',
+          transform: revealed ? 'translateY(0)' : 'translateY(6px)',
+          opacity: revealed ? 1 : 0,
+          transition: 'opacity 0.5s ease, transform 0.5s ease',
+        }}
+      >
+        {value}
+      </span>
+      <p className="txt-meta" style={{ opacity: 0.7 }}>
+        {sub}
+      </p>
+    </div>
+  );
+}
+
+// A marker on the shared /10 spectrum.
+function Tick({ pos, revealed, solid = false }: { pos: number; revealed: boolean; solid?: boolean }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: -4,
+        left: `${Math.max(0, Math.min(1, pos)) * 100}%`,
+        width: 2,
+        height: 10,
+        background: 'var(--color-ground)',
+        opacity: revealed ? (solid ? 1 : 0.5) : 0,
+        transform: 'translateX(-1px)',
+        transition: 'opacity 0.6s ease 0.2s',
+      }}
+    />
+  );
+}
+
+// A HIT/MISS button that charges on press-down (Law 1) and commits on release.
+function PressButton({
+  label,
+  charging,
+  disabled,
+  onDown,
+  onCancel,
+  onCommit,
+}: {
+  label: string;
+  charging: boolean;
+  disabled: boolean;
+  onDown: () => void;
+  onCancel: () => void;
+  onCommit: () => void;
+}) {
+  return (
+    <button
+      className="vote-btn font-bold uppercase"
+      style={{ position: 'relative', overflow: 'hidden', fontSize: 22, fontWeight: 700, letterSpacing: '0.06em' }}
+      disabled={disabled}
+      onPointerDown={onDown}
+      onPointerLeave={onCancel}
+      onPointerCancel={onCancel}
+      onClick={onCommit}
+      aria-label={`Vote ${label}`}
+    >
+      {/* The charge: a fill rising from the bottom while pressed. */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: charging ? '100%' : '0%',
+          background: 'rgba(244,244,242,0.10)',
+          transition: 'height 0.45s ease',
+          pointerEvents: 'none',
+        }}
+      />
+      <span style={{ position: 'relative' }}>{label}</span>
+    </button>
   );
 }
