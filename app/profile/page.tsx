@@ -118,6 +118,7 @@ export default function ProfilePage() {
                         className="absolute top-1 right-1 px-1.5 py-0.5"
                         style={{
                           background: 'rgba(255,255,255,0.85)',
+                          color: 'var(--color-ground)',
                           fontSize: '10px',
                           fontWeight: 700,
                         }}
@@ -129,6 +130,7 @@ export default function ProfilePage() {
                         className="absolute top-1 right-1 px-1.5 py-0.5"
                         style={{
                           background: 'rgba(255,255,255,0.85)',
+                          color: 'var(--color-ground)',
                           fontSize: '8px',
                           fontWeight: 500,
                           opacity: 0.6,

@@ -252,6 +252,7 @@ export default function Home() {
                           className="absolute top-1 right-1 px-1.5 py-0.5"
                           style={{
                             background: 'rgba(255,255,255,0.85)',
+                            color: 'var(--color-ground)',
                             fontSize: '8px',
                             fontWeight: 700,
                           }}
@@ -264,8 +265,8 @@ export default function Home() {
                         <div
                           className="absolute bottom-1 right-1 px-1.5 py-0.5"
                           style={{
-                            background: vote === 'hot' ? 'var(--color-text)' : 'rgba(255,255,255,0.85)',
-                            color: vote === 'hot' ? '#fff' : 'var(--color-text)',
+                            background: vote === 'hot' ? 'var(--color-ground)' : 'rgba(255,255,255,0.85)',
+                            color: vote === 'hot' ? 'var(--color-text)' : 'var(--color-ground)',
                             fontSize: '10px',
                             fontWeight: 700,
                           }}

@@ -36,8 +36,8 @@ export default function ItemImage({ item, size }: ItemImageProps) {
         className="flex flex-col items-center justify-center flex-shrink-0"
         style={{
           ...dims,
-          border: '1px solid var(--color-text)',
-          background: 'rgba(255,255,255,0.3)',
+          border: '1px solid var(--color-line)',
+          background: 'rgba(255,255,255,0.04)',
         }}
       >
         <svg

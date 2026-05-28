@@ -125,7 +125,7 @@ export default function OutfitCard({
             {/* Score badge */}
             {hotPct !== null && (
               <div className="absolute top-3 right-3 bg-white/90 px-2 py-1">
-                <span className="txt-meta font-bold">{hotPct}%</span>
+                <span className="txt-meta font-bold" style={{ color: 'var(--color-ground)' }}>{hotPct}%</span>
               </div>
             )}
           </div>

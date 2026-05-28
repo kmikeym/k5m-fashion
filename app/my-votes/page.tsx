@@ -129,8 +129,8 @@ export default function MyVotesPage() {
                       <div
                         className="absolute bottom-1 right-1 px-1.5 py-0.5"
                         style={{
-                          background: v.vote === 'hot' ? 'var(--color-text)' : 'rgba(255,255,255,0.85)',
-                          color: v.vote === 'hot' ? '#fff' : 'var(--color-text)',
+                          background: v.vote === 'hot' ? 'var(--color-ground)' : 'rgba(255,255,255,0.85)',
+                          color: v.vote === 'hot' ? 'var(--color-text)' : 'var(--color-ground)',
                           fontSize: '8px',
                           fontWeight: 700,
                           textTransform: 'uppercase',
