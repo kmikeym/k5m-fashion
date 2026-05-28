@@ -14,3 +14,8 @@ ALTER TABLE outfits ADD COLUMN instrument_baseline REAL;
 -- anonymous device-token UUID; voter_type disambiguates. UNIQUE(outfit_id, user_id)
 -- continues to dedup either kind. Existing rows are real users (default 'user').
 ALTER TABLE votes ADD COLUMN voter_type TEXT NOT NULL DEFAULT 'user'; -- 'user' | 'anon'
+
+-- 005c: store the request IP for abuse/rate-limiting ONLY (never identity — carrier
+-- NAT + IG webview put many real users behind one IP). Nullable; old rows stay NULL.
+ALTER TABLE votes ADD COLUMN ip TEXT;
+CREATE INDEX IF NOT EXISTS idx_votes_ip_time ON votes(ip, created_at);
