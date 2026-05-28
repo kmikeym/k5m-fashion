@@ -11,8 +11,11 @@ const config: Config = {
         primary: ['"Helvetica Neue"', 'Helvetica', '-apple-system', 'BlinkMacSystemFont', 'Arial', 'sans-serif'],
       },
       colors: {
-        ink: '#0d0d0d',
-        line: 'rgba(13, 13, 13, 0.3)',
+        /* "ink" is the foreground mark. The Instrument inverts the ground to
+           near-black, so ink is now off-white and line is a faint off-white hairline. */
+        ground: '#0d0d0d',
+        ink: '#f4f4f2',
+        line: 'rgba(244, 244, 242, 0.22)',
       },
     },
   },

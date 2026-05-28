@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { getD1 } from '@/lib/db';
+import { MIN_VOTES } from '@/lib/verdict';
 
 export const runtime = 'edge';
 
@@ -137,7 +138,8 @@ export async function GET(request: NextRequest) {
         pairTotal += votes.hot + votes.not;
       }
 
-      if (pairTotal === 0) continue;
+      // Min-N gate (#12): a synergy below the threshold is noise, not insight.
+      if (pairTotal < MIN_VOTES) continue;
 
       const pairRate = pairHot / pairTotal;
       const rateA = itemStats[a]?.total > 0 ? itemStats[a].hot / itemStats[a].total : 0;
