@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const outfit_id = searchParams.get('outfit_id');
   const mine = searchParams.get('mine');
+  const token = searchParams.get('token');
 
   const { userId } = await auth();
   const db = await getD1();
@@ -33,11 +34,13 @@ export async function GET(request: NextRequest) {
       FROM votes WHERE outfit_id = ?`
     ).bind(outfit_id).first();
 
+    // "My vote" resolves by Clerk id when signed in, else by the anon device token.
     let myVote = null;
-    if (userId) {
+    const voter = userId || token;
+    if (voter) {
       const row = await db.prepare(
         'SELECT vote FROM votes WHERE outfit_id = ? AND user_id = ?'
-      ).bind(outfit_id, userId).first();
+      ).bind(outfit_id, voter).first();
       myVote = row?.vote || null;
     }
 
