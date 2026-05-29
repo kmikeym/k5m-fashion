@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useUser, SignInButton } from '@clerk/nextjs';
 import type { Outfit, Item } from '@/lib/types';
 import { getDisplayName } from '@/lib/data';
+import { useDeviceToken } from '@/lib/useDeviceToken';
+import { MIN_VOTES } from '@/lib/verdict';
 
 interface OutfitCardProps {
   outfit: Outfit;
@@ -17,8 +18,9 @@ export default function OutfitCard({
   items,
   showVoting = true,
 }: OutfitCardProps) {
-  const { isSignedIn, isLoaded } = useUser();
+  const token = useDeviceToken();
   const [voted, setVoted] = useState<'hot' | 'not' | null>(null);
+  // THE ROOM is frozen at load (Law 3) — the user's tap never moves the displayed %.
   const [hotCount, setHotCount] = useState(0);
   const [notCount, setNotCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,8 @@ export default function OutfitCard({
   const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/votes?outfit_id=${outfit.id}`)
+    const q = token ? `&token=${encodeURIComponent(token)}` : '';
+    fetch(`/api/votes?outfit_id=${outfit.id}${q}`)
       .then((r) => r.json())
       .then((data) => data as { hot?: number; not?: number; myVote?: 'hot' | 'not' })
       .then((data) => {
@@ -35,46 +38,36 @@ export default function OutfitCard({
         if (data.myVote) setVoted(data.myVote);
       })
       .catch(() => {});
-  }, [outfit.id]);
+  }, [outfit.id, token]);
 
   async function vote(choice: 'hot' | 'not') {
     if (voted || loading) return;
     setLoading(true);
     setVoteError(false);
-
     try {
       const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          outfit_id: outfit.id,
-          vote: choice === 'hot' ? 1 : 0,
-        }),
+        body: JSON.stringify({ outfit_id: outfit.id, vote: choice === 'hot' ? 1 : 0, token }),
       });
-
+      // No login required — anonymous device token is the vote identity.
       if (res.ok || res.status === 409) {
-        setVoted(choice);
-        if (res.ok) {
-          if (choice === 'hot') setHotCount((c) => c + 1);
-          else setNotCount((c) => c + 1);
-        }
+        setVoted(choice); // Law 3: do not increment the displayed room average.
         setLoading(false);
         window.dispatchEvent(new CustomEvent('outfit-voted'));
         return;
       }
-
-      // Non-OK, non-409 response
       setVoteError(true);
       setTimeout(() => setVoteError(false), 4000);
     } catch {
       setVoteError(true);
       setTimeout(() => setVoteError(false), 4000);
     }
-
     setLoading(false);
   }
 
   const total = hotCount + notCount;
+  const roomHasData = total >= MIN_VOTES;
   const hotPct = total > 0 ? Math.round((hotCount / total) * 100) : null;
 
   return (
@@ -85,7 +78,7 @@ export default function OutfitCard({
           <div className="fit-photo-container">
             {imgError ? (
               <div className="outfit-img-fallback" style={{ aspectRatio: '3/4' }}>
-                <span className="txt-display-outline" style={{ fontSize: 24 }}>
+                <span className="txt-meta opacity-50">
                   {new Date(outfit.date + 'T12:00:00').toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -122,10 +115,12 @@ export default function OutfitCard({
                 ))
               )}
             </div>
-            {/* Score badge */}
-            {hotPct !== null && (
+            {/* Score badge — only once the room has a settled reading (Law 7) */}
+            {roomHasData && hotPct !== null && (
               <div className="absolute top-3 right-3 bg-white/90 px-2 py-1">
-                <span className="txt-meta font-bold" style={{ color: 'var(--color-ground)' }}>{hotPct}%</span>
+                <span className="txt-meta font-bold" style={{ color: 'var(--color-ground)' }}>
+                  {hotPct}% HIT
+                </span>
               </div>
             )}
           </div>
@@ -134,15 +129,10 @@ export default function OutfitCard({
         {/* Description */}
         {(outfit.description || outfit.location) && (
           <div className="mt-3 mb-4">
-            {outfit.description && (
-              <p className="text-sm font-medium">{outfit.description}</p>
-            )}
-            {outfit.location && (
-              <p className="txt-meta opacity-50 mt-1">{outfit.location}</p>
-            )}
+            {outfit.description && <p className="text-sm font-medium">{outfit.description}</p>}
+            {outfit.location && <p className="txt-meta opacity-50 mt-1">{outfit.location}</p>}
           </div>
         )}
-
       </div>
 
       {/* Vote error */}
@@ -152,54 +142,42 @@ export default function OutfitCard({
         </div>
       )}
 
-      {/* Vote buttons */}
-      {!isLoaded ? null : showVoting && !isSignedIn ? (
-        <div
-          className="relative z-10 text-center"
-          style={{
-            padding: '20px var(--pad)',
-            borderTop: '1px solid var(--color-text)',
-            borderBottom: '1px solid var(--color-text)',
-          }}
-        >
-          <SignInButton mode="modal">
-            <button className="txt-meta font-bold uppercase tracking-wider hover:opacity-70 transition-opacity cursor-pointer">
-              Sign in to vote
-            </button>
-          </SignInButton>
-        </div>
-      ) : showVoting && !voted ? (
+      {/* Vote — no login required. Hit / Miss, then route to the full verdict. */}
+      {!showVoting ? null : !voted ? (
         <div className="vote-btn-row">
           <button
             onClick={() => vote('not')}
-            disabled={loading}
-            className="vote-btn"
-            aria-label="Vote down"
+            disabled={loading || token === null}
+            className="vote-btn font-bold uppercase"
+            style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.06em' }}
+            aria-label="Vote Miss"
           >
-            −
+            Miss
           </button>
           <button
             onClick={() => vote('hot')}
-            disabled={loading}
-            className="vote-btn"
-            aria-label="Vote up"
+            disabled={loading || token === null}
+            className="vote-btn font-bold uppercase"
+            style={{ fontSize: 20, fontWeight: 700, letterSpacing: '0.06em' }}
+            aria-label="Vote Hit"
           >
-            +
+            Hit
           </button>
         </div>
-      ) : showVoting && voted ? (
+      ) : (
         <div className="score-display">
-          <div className="flex items-baseline gap-2">
-            <span className="score-pct">{hotPct !== null ? `${hotPct}%` : '—'}</span>
-          </div>
-          <div className="score-bar">
-            <div className="score-bar-fill" style={{ width: `${hotPct || 0}%` }} />
-          </div>
-          <p className="txt-meta opacity-50 mt-2">
-            {total} vote{total !== 1 ? 's' : ''}
+          <p className="txt-meta font-semibold uppercase" style={{ letterSpacing: '0.08em' }}>
+            You said {voted === 'hot' ? 'HIT' : 'MISS'}
           </p>
+          <Link
+            href={`/outfits/${outfit.id}`}
+            className="inline-block mt-2 txt-meta font-bold uppercase"
+            style={{ letterSpacing: '0.08em', textDecoration: 'underline' }}
+          >
+            See the full verdict &rarr;
+          </Link>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
